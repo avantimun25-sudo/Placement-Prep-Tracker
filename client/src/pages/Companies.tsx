@@ -10,21 +10,18 @@ export default function Companies() {
   const updateCompany = useUpdateCompany();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newCompany, setNewCompany] = useState({ name: "", role: "", status: "wishlist", notes: "" });
+  const [newCompany, setNewCompany] = useState({ name: "", role: "", status: "applied", notes: "" });
 
   const statuses = [
-    { id: 'wishlist', label: 'Wishlist', color: 'bg-slate-100 text-slate-600 border-slate-200' },
     { id: 'applied', label: 'Applied', color: 'bg-blue-50 text-blue-600 border-blue-200' },
     { id: 'interviewing', label: 'Interviewing', color: 'bg-yellow-50 text-yellow-600 border-yellow-200' },
-    { id: 'offer', label: 'Offer Received', color: 'bg-green-50 text-green-600 border-green-200' },
-    { id: 'rejected', label: 'Rejected', color: 'bg-red-50 text-red-600 border-red-200' },
   ];
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     await createCompany.mutateAsync(newCompany);
     setIsModalOpen(false);
-    setNewCompany({ name: "", role: "", status: "wishlist", notes: "" });
+    setNewCompany({ name: "", role: "", status: "applied", notes: "" });
   };
 
   return (

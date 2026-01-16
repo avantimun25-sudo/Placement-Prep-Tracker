@@ -15,7 +15,6 @@ export default function Dashboard() {
   const completedGoals = goals.filter(g => g.isCompleted).length;
   const pendingGoals = goals.length - completedGoals;
   const activeApplications = companies.filter(c => ['applied', 'interviewing'].includes(c.status)).length;
-  const offers = companies.filter(c => c.status === 'offer').length;
   const avgProficiency = skills.length 
     ? Math.round(skills.reduce((acc, s) => acc + (s.level || 0), 0) / skills.length) 
     : 0;
