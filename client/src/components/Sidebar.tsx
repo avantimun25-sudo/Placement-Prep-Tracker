@@ -99,6 +99,10 @@ export function Sidebar() {
                 src={profile.profileImageUrl} 
                 alt="Profile" 
                 className="w-8 h-8 rounded-full shadow-md object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = "/default-avatar.png";
+                  e.currentTarget.onerror = null;
+                }}
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white text-xs font-bold shadow-md">

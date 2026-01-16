@@ -148,6 +148,10 @@ export default function Profile() {
                     src={previewUrl} 
                     alt="Profile" 
                     className="w-full h-full object-cover rounded-xl"
+                    onError={(e) => {
+                      e.currentTarget.src = "/default-avatar.png";
+                      e.currentTarget.onerror = null;
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full bg-slate-50 flex items-center justify-center rounded-xl">

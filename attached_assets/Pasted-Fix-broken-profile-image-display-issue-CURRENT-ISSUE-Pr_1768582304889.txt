@@ -1,0 +1,86 @@
+Fix broken profile image display issue.
+
+CURRENT ISSUE:
+- Profile image shows broken image icon.
+- Image URL exists but file is not loading.
+- Sidebar and profile card show empty/broken image.
+
+ROOT CAUSE:
+- Uploaded image path is not being served correctly.
+- No fallback avatar when image fails.
+- Image src is not validated.
+
+MANDATORY FIXES:
+
+--------------------------------
+BACKEND STATIC FILE FIX
+--------------------------------
+Ensure uploaded images are publicly accessible.
+
+Add this ONCE in backend (top-level):
+
+app.use("/uploads", express.static("uploads"));
+
+Confirm images are saved in:
+uploads/<filename>
+
+--------------------------------
+BACKEND RESPONSE FIX
+--------------------------------
+When saving profile image, ALWAYS store full path:
+
+profile_image_url = `/uploads/${filename}`
+
+NOT:
+- filename only
+- local file path
+- absolute server path
+
+--------------------------------
+FRONTEND IMAGE RENDER FIX
+--------------------------------
+Profile image component must:
+
+1. Check if profile_image_url exists
+2. Render image ONLY if valid
+3. Use fallback avatar if image fails to load
+
+Replace profile image JSX with:
+
+<img
+  src={profile.profile_image_url || "/default-avatar.png"}
+  alt="Profile"
+  onError={(e) => {
+    e.currentTarget.src = "/default-avatar.png";
+  }}
+  className="profile-avatar"
+/>
+
+--------------------------------
+ADD DEFAULT AVATAR
+--------------------------------
+1. Add a default avatar image:
+   public/default-avatar.png
+
+2. Use initials ONLY if image is missing:
+   - First letter of full_name
+
+--------------------------------
+SIDEBAR + PROFILE SYNC
+--------------------------------
+- Sidebar must use SAME image logic.
+- No hardcoded images.
+- No broken icons ever.
+
+--------------------------------
+EXPECTED RESULT:
+--------------------------------
+- Profile image loads correctly.
+- No broken image icon.
+- Default avatar shows if no image.
+- Works after refresh and relogin.
+
+STRICT RULES:
+- Do NOT remove profile image feature.
+- Do NOT store images in DB.
+- Do NOT hardcode URLs.
