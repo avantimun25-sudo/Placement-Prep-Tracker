@@ -118,8 +118,7 @@ export async function registerRoutes(
     res.json({ status: "ok", message: "Server is running and connected to DB" });
   });
 
-  // Seed data on startup
-  seedData();
+  // seedData(); // Removed seed data on startup
 
   // Skills
   app.get(api.skills.list.path, async (_req, res) => {
