@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,25 +15,74 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
   const { toast } = useToast();
-  const userData = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  const [userData, setUserData] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
-
   const [formData, setFormData] = useState({
-    name: userData.name || "John Student",
-    phone: userData.phone || "",
-    branch: userData.branch || "Computer Science",
-    status: userData.status || "Final Year",
-    gradYear: userData.gradYear || 2025,
+    name: "",
+    phone: "",
+    branch: "",
+    status: "",
+    gradYear: 2025,
   });
 
+  useEffect(() => {
+    const userStr = localStorage.getItem("currentUser");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      setUserData(user);
+      setFormData({
+        name: user.name || "",
+        phone: user.phone || "",
+        branch: user.branch || "",
+        status: user.status || "",
+        gradYear: user.gradYear || 2025,
+      });
+    }
+  }, []);
+
+  if (!userData) return null;
+
   const profileFields = [
-    { label: "Full Name", value: formData.name, icon: User },
+    { label: "Full Name", value: formData.name || "Not provided", icon: User },
     { label: "Email Address", value: userData.email, icon: Mail },
     { label: "Phone Number", value: formData.phone || "Not provided", icon: Phone },
-    { label: "Department / Branch", value: formData.branch, icon: BookOpen },
-    { label: "Academic Status", value: formData.status, icon: GraduationCap },
+    { label: "Department / Branch", value: formData.branch || "Not provided", icon: BookOpen },
+    { label: "Academic Status", value: formData.status || "Not provided", icon: GraduationCap },
     { label: "Graduation Year", value: formData.gradYear, icon: Calendar },
   ];
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: userData.id, ...formData }),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUserData(updatedUser);
+        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+        setIsEditing(false);
+        toast({
+          title: "Success",
+          description: "Profile updated successfully!",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update profile",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Server connection failed",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -55,25 +104,9 @@ export default function Profile() {
                 <X className="w-4 h-4" /> Cancel
               </Button>
               <Button 
-                onClick={() => {
-                  const updatedUser = { ...userData, ...formData };
-                  localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-                  
-                  // Also update the users array to persist changes across logins
-                  const users = JSON.parse(localStorage.getItem("users") || "[]");
-                  const userIdx = users.findIndex((u: any) => u.email === userData.email);
-                  if (userIdx !== -1) {
-                    users[userIdx] = { ...users[userIdx], ...formData };
-                    localStorage.setItem("users", JSON.stringify(users));
-                  }
-
-                  setIsEditing(false);
-                  toast({
-                    title: "Success",
-                    description: "Profile updated successfully!",
-                  });
-                }} 
+                onClick={handleSave} 
                 className="h-9 gap-2 bg-slate-900"
+                data-testid="button-save-profile"
               >
                 <Check className="w-4 h-4" /> Save Changes
               </Button>

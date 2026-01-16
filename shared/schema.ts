@@ -6,6 +6,11 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  name: text("name"),
+  phone: text("phone"),
+  branch: text("branch"),
+  status: text("status"),
+  gradYear: integer("grad_year"),
 });
 
 export const skills = pgTable("skills", {

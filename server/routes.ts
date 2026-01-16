@@ -5,10 +5,6 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { insertUserSchema } from "@shared/schema";
 
-async function seedData() {
-  // ... existing seed logic
-}
-
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -33,45 +29,23 @@ export async function registerRoutes(
       if (!user || user.password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      res.json({ id: user.id, email: user.email });
+      res.json(user);
     } catch (err) {
       res.status(500).json({ message: "Server error" });
     }
   });
 
-  const existingSkills = await storage.getSkills();
-  if (existingSkills.length === 0) {
-    await storage.createSkill({ name: "JavaScript", category: "technical", proficiency: 70, targetLevel: 90 });
-    await storage.createSkill({ name: "React", category: "technical", proficiency: 60, targetLevel: 85 });
-    await storage.createSkill({ name: "Communication", category: "soft-skills", proficiency: 80, targetLevel: 100 });
-    await storage.createSkill({ name: "Problem Solving", category: "aptitude", proficiency: 50, targetLevel: 90 });
-  }
+  app.patch("/api/profile", async (req, res) => {
+    try {
+      const { id, ...updates } = req.body;
+      if (!id) return res.status(400).json({ message: "User ID required" });
+      const user = await storage.updateUser(id, updates);
+      res.json(user);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
 
-  const existingCompanies = await storage.getCompanies();
-  if (existingCompanies.length === 0) {
-    await storage.createCompany({ name: "Google", role: "Software Engineer", status: "wishlist", notes: "Focus on DSA" });
-    await storage.createCompany({ name: "Microsoft", role: "SDE I", status: "applied", notes: "Applied via referral" });
-    await storage.createCompany({ name: "Amazon", role: "SDE", status: "interviewing", notes: "OA cleared" });
-  }
-
-  const existingTips = await storage.getTips();
-  if (existingTips.length === 0) {
-    await storage.createTip({ title: "STAR Method", category: "interview", content: "Situation, Task, Action, Result - use this for behavioral questions." });
-    await storage.createTip({ title: "Resume Formatting", category: "resume", content: "Keep it to one page. Use action verbs. Quantify achievements." });
-  }
-  
-  const existingGoals = await storage.getGoals();
-  if (existingGoals.length === 0) {
-    await storage.createGoal({ title: "Solve 2 LeetCode Mediums", isCompleted: false });
-    await storage.createGoal({ title: "Update Resume", isCompleted: true });
-    await storage.createGoal({ title: "Mock Interview", isCompleted: false });
-  }
-}
-
-export async function registerRoutes(
-  httpServer: Server,
-  app: Express
-): Promise<Server> {
   // Simple API test route
   app.get("/api/health", async (_req, res) => {
     res.json({ status: "ok", message: "Server is running and connected to DB" });
