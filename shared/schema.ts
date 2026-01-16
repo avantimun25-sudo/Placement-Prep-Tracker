@@ -9,8 +9,8 @@ export const users = pgTable("users", {
   name: text("name"),
   phone: text("phone"),
   branch: text("branch"),
-  status: text("status"),
-  gradYear: integer("grad_year"),
+  academicStatus: text("academic_status"),
+  graduationYear: integer("graduation_year"),
 });
 
 export const skills = pgTable("skills", {

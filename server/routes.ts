@@ -65,11 +65,18 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/profile", async (req, res) => {
+  app.put("/api/profile", async (req, res) => {
     try {
-      const { id, ...updates } = req.body;
-      if (!id) return res.status(400).json({ message: "User ID required" });
-      const user = await storage.updateUser(id, updates);
+      const { userId, name, phone, branch, academicStatus, graduationYear } = req.body;
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      
+      const user = await storage.updateUser(userId, {
+        name,
+        phone,
+        branch,
+        academicStatus,
+        graduationYear
+      });
       res.json(user);
     } catch (err) {
       res.status(500).json({ message: "Failed to update profile" });

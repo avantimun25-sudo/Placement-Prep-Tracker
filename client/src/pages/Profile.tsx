@@ -21,8 +21,8 @@ export default function Profile() {
     name: "",
     phone: "",
     branch: "",
-    status: "",
-    gradYear: 2025,
+    academicStatus: "",
+    graduationYear: 2025,
   });
 
   useEffect(() => {
@@ -34,8 +34,8 @@ export default function Profile() {
         name: user.name || "",
         phone: user.phone || "",
         branch: user.branch || "",
-        status: user.status || "",
-        gradYear: user.gradYear || 2025,
+        academicStatus: user.academicStatus || "",
+        graduationYear: user.graduationYear || 2025,
       });
     }
   }, []);
@@ -47,16 +47,16 @@ export default function Profile() {
     { label: "Email Address", value: userData.email, icon: Mail },
     { label: "Phone Number", value: formData.phone || "Not provided", icon: Phone },
     { label: "Department / Branch", value: formData.branch || "Not provided", icon: BookOpen },
-    { label: "Academic Status", value: formData.status || "Not provided", icon: GraduationCap },
-    { label: "Graduation Year", value: formData.gradYear, icon: Calendar },
+    { label: "Academic Status", value: formData.academicStatus || "Not provided", icon: GraduationCap },
+    { label: "Graduation Year", value: formData.graduationYear, icon: Calendar },
   ];
 
   const handleSave = async () => {
     try {
       const response = await fetch("/api/profile", {
-        method: "PATCH",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: userData.id, ...formData }),
+        body: JSON.stringify({ userId: userData.id, ...formData }),
       });
 
       if (response.ok) {
@@ -165,8 +165,8 @@ export default function Profile() {
               <div className="space-y-2">
                 <Label htmlFor="status">Academic Status</Label>
                 <Select 
-                  value={formData.status}
-                  onValueChange={(value) => setFormData({ ...formData, status: value })}
+                  value={formData.academicStatus}
+                  onValueChange={(value) => setFormData({ ...formData, academicStatus: value })}
                 >
                   <SelectTrigger id="status">
                     <SelectValue placeholder="Select status" />
@@ -184,8 +184,8 @@ export default function Profile() {
                 <Input 
                   id="gradYear" 
                   type="number" 
-                  value={formData.gradYear}
-                  onChange={(e) => setFormData({ ...formData, gradYear: parseInt(e.target.value) || 0 })}
+                  value={formData.graduationYear}
+                  onChange={(e) => setFormData({ ...formData, graduationYear: parseInt(e.target.value) || 0 })}
                 />
               </div>
             </form>
