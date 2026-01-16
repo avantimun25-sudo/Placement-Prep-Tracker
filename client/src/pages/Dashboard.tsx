@@ -4,8 +4,10 @@ import { useCompanies } from "@/hooks/use-companies";
 import { StatCard } from "@/components/StatCard";
 import { Trophy, Briefcase, CheckSquare, TrendingUp } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { useLocation } from "wouter";
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
   const { data: skills = [] } = useSkills();
   const { data: goals = [] } = useGoals();
   const { data: companies = [] } = useCompanies();
@@ -34,32 +36,32 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          label="Skills Average" 
-          value={skills.length > 0 ? `${avgProficiency}%` : "0%"} 
-          icon={TrendingUp} 
-          color="primary"
-          trend={undefined}
-        />
-        <StatCard 
-          label="Active Applications" 
-          value={activeApplications} 
-          icon={Briefcase} 
-          color="blue"
-        />
-        <StatCard 
-          label="Goals Completed" 
-          value={completedGoals} 
-          icon={CheckSquare} 
-          color="green"
-        />
-        <StatCard 
-          label="Offers Received" 
-          value={offers} 
-          icon={Trophy} 
-          color="accent"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div onClick={() => setLocation("/skills")} className="cursor-pointer">
+          <StatCard 
+            label="Skills Average" 
+            value={skills.length > 0 ? `${avgProficiency}%` : "0%"} 
+            icon={TrendingUp} 
+            color="primary"
+            trend={undefined}
+          />
+        </div>
+        <div onClick={() => setLocation("/companies")} className="cursor-pointer">
+          <StatCard 
+            label="Active Applications" 
+            value={activeApplications} 
+            icon={Briefcase} 
+            color="blue"
+          />
+        </div>
+        <div onClick={() => setLocation("/goals")} className="cursor-pointer">
+          <StatCard 
+            label="Goals Completed" 
+            value={completedGoals} 
+            icon={CheckSquare} 
+            color="green"
+          />
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
