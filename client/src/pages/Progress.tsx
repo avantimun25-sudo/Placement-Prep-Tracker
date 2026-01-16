@@ -73,10 +73,19 @@ export default function Progress() {
         {/* Category Radar/Radial */}
         <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-6">Domain Mastery</h3>
-          <div className="flex flex-col md:flex-row items-center justify-between h-80 gap-6">
-            <div className="flex-1 w-full h-full">
+          <div className="flex flex-col md:flex-row items-center justify-center h-80 gap-8 md:gap-12">
+            <div className="relative w-full max-w-[280px] aspect-square flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
-                <RadialBarChart cx="50%" cy="50%" innerRadius="30%" outerRadius="100%" barSize={15} data={categoryData}>
+                <RadialBarChart 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius="30%" 
+                  outerRadius="100%" 
+                  barSize={15} 
+                  data={categoryData}
+                  startAngle={90}
+                  endAngle={450}
+                >
                   <RadialBar
                     background
                     dataKey="score"
@@ -87,14 +96,20 @@ export default function Progress() {
                   />
                 </RadialBarChart>
               </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-2xl font-bold text-slate-900">
+                  {Math.round(categoryData.reduce((acc, curr) => acc + curr.score, 0) / categoryData.length)}%
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Average</span>
+              </div>
             </div>
-            <div className="flex flex-col gap-6 min-w-[160px]">
+            <div className="flex flex-col gap-5 min-w-[180px] w-full md:w-auto">
               {categoryData.map((item, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-800 leading-none mb-1">{item.name}</span>
-                    <span className="text-xs font-medium text-slate-500">{item.score}% Mastery</span>
+                <div key={index} className="flex items-center gap-4 group">
+                  <div className="w-4 h-4 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: item.fill }} />
+                  <div className="flex flex-col flex-1">
+                    <span className="text-sm font-bold text-slate-800 leading-none mb-1.5 group-hover:text-primary transition-colors">{item.name}</span>
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{item.score}% Mastery</span>
                   </div>
                 </div>
               ))}
