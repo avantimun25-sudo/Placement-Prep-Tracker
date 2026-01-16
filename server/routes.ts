@@ -121,15 +121,19 @@ export async function registerRoutes(
   // seedData(); // Removed seed data on startup
 
   // Skills
-  app.get(api.skills.list.path, async (_req, res) => {
-    const result = await storage.getSkills();
+  app.get(api.skills.list.path, async (req, res) => {
+    const userId = parseInt(req.query.userId as string);
+    if (!userId) return res.status(400).json({ message: "User ID required" });
+    const result = await storage.getSkills(userId);
     res.json(result);
   });
 
   app.post(api.skills.create.path, async (req, res) => {
     try {
-      const input = api.skills.create.input.parse(req.body);
-      const result = await storage.createSkill(input);
+      const { userId, ...data } = req.body;
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      const input = api.skills.create.input.parse(data);
+      const result = await storage.createSkill({ ...input, userId });
       res.status(201).json(result);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -141,8 +145,10 @@ export async function registerRoutes(
   app.patch(api.skills.update.path, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const input = api.skills.update.input.parse(req.body);
-      const result = await storage.updateSkill(id, input);
+      const { userId, ...data } = req.body;
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      const input = api.skills.update.input.parse(data);
+      const result = await storage.updateSkill(id, userId, input);
       res.json(result);
     } catch (err) {
        res.status(404).json({ message: "Not found" });
@@ -151,7 +157,10 @@ export async function registerRoutes(
 
   app.delete(api.skills.delete.path, async (req, res) => {
     try {
-      await storage.deleteSkill(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      const userId = parseInt(req.query.userId as string);
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      await storage.deleteSkill(id, userId);
       res.status(204).send();
     } catch (err) {
       res.status(404).json({ message: "Not found" });
@@ -159,15 +168,19 @@ export async function registerRoutes(
   });
 
   // Goals
-  app.get(api.goals.list.path, async (_req, res) => {
-    const result = await storage.getGoals();
+  app.get(api.goals.list.path, async (req, res) => {
+    const userId = parseInt(req.query.userId as string);
+    if (!userId) return res.status(400).json({ message: "User ID required" });
+    const result = await storage.getGoals(userId);
     res.json(result);
   });
 
   app.post(api.goals.create.path, async (req, res) => {
     try {
-      const input = api.goals.create.input.parse(req.body);
-      const result = await storage.createGoal(input);
+      const { userId, ...data } = req.body;
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      const input = api.goals.create.input.parse(data);
+      const result = await storage.createGoal({ ...input, userId });
       res.status(201).json(result);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -178,7 +191,10 @@ export async function registerRoutes(
 
   app.patch(api.goals.toggle.path, async (req, res) => {
     try {
-      const result = await storage.toggleGoal(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      const { userId } = req.body;
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      const result = await storage.toggleGoal(id, userId);
       res.json(result);
     } catch (err) {
       res.status(404).json({ message: "Not found" });
@@ -186,15 +202,19 @@ export async function registerRoutes(
   });
 
   // Companies
-  app.get(api.companies.list.path, async (_req, res) => {
-    const result = await storage.getCompanies();
+  app.get(api.companies.list.path, async (req, res) => {
+    const userId = parseInt(req.query.userId as string);
+    if (!userId) return res.status(400).json({ message: "User ID required" });
+    const result = await storage.getCompanies(userId);
     res.json(result);
   });
 
   app.post(api.companies.create.path, async (req, res) => {
     try {
-      const input = api.companies.create.input.parse(req.body);
-      const result = await storage.createCompany(input);
+      const { userId, ...data } = req.body;
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      const input = api.companies.create.input.parse(data);
+      const result = await storage.createCompany({ ...input, userId });
       res.status(201).json(result);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -206,8 +226,10 @@ export async function registerRoutes(
   app.patch(api.companies.update.path, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const input = api.companies.update.input.parse(req.body);
-      const result = await storage.updateCompany(id, input);
+      const { userId, ...data } = req.body;
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      const input = api.companies.update.input.parse(data);
+      const result = await storage.updateCompany(id, userId, input);
       res.json(result);
     } catch (err) {
       res.status(404).json({ message: "Not found" });

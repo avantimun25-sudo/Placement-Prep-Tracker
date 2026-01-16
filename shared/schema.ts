@@ -15,6 +15,7 @@ export const users = pgTable("users", {
 
 export const skills = pgTable("skills", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   name: text("name").notNull(),
   category: text("category").notNull(), // 'technical', 'aptitude', 'soft-skills'
   proficiency: integer("proficiency").default(0), // 0-100
@@ -23,6 +24,7 @@ export const skills = pgTable("skills", {
 
 export const goals = pgTable("goals", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   title: text("title").notNull(),
   isCompleted: boolean("is_completed").default(false),
   date: timestamp("date").defaultNow(),
@@ -30,6 +32,7 @@ export const goals = pgTable("goals", {
 
 export const companies = pgTable("companies", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   name: text("name").notNull(),
   role: text("role").notNull(),
   status: text("status").notNull(), // 'wishlist', 'applied', 'interviewing', 'offer', 'rejected'
