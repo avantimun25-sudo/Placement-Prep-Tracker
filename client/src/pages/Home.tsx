@@ -65,7 +65,7 @@ export default function Home() {
             </motion.p>
             
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-              <Link href="/login" className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-xl shadow-slate-900/20 hover:shadow-primary/20">
+              <Link href="/register" className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-xl shadow-slate-900/20 hover:shadow-primary/20">
                 Start Preparing
                 <ArrowRight className="w-4 h-4" />
               </Link>
