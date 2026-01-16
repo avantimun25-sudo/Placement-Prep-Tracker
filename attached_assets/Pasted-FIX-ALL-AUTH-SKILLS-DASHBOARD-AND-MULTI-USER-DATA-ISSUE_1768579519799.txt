@@ -1,0 +1,135 @@
+FIX ALL AUTH, SKILLS, DASHBOARD, AND MULTI-USER DATA ISSUES.
+
+CURRENT PROBLEMS:
+1. New users see previous user’s data (skills %, progress).
+2. Dashboard shows random/hardcoded values like 47%, 65%, 2.
+3. Clicking "Add Skill" throws "Failed to create skill".
+4. Skills are not saved correctly per user.
+5. Data is shared across users instead of being isolated.
+
+ROOT CAUSE:
+- Data is not properly scoped using userId.
+- Frontend uses hardcoded/demo fallback values.
+- Backend queries are not filtered by userId.
+- userId is missing or mismatched during skill creation.
+
+GOAL:
+Each user must have completely isolated data.
+Dashboard must show ZERO until user enters data.
+Skills must save correctly per logged-in user.
+
+MANDATORY CHANGES (DO ALL):
+
+--------------------------------
+AUTHENTICATION (SOURCE OF TRUTH)
+--------------------------------
+1. Login API must return:
+   { userId }
+
+2. Frontend must store ONLY:
+   localStorage.currentUser = { userId }
+
+3. NEVER store users, skills, or progress in localStorage.
+
+--------------------------------
+DATABASE STRUCTURE (REQUIRED)
+--------------------------------
+Ensure ALL tables include user_id:
+
+users:
+- id (PK)
+- email
+- password
+
+skills:
+- id
+- user_id
+- skill_name
+- level
+
+goals:
+- id
+- user_id
+- title
+- completed
+
+companies:
+- id
+- user_id
+- company_name
+- status
+
+--------------------------------
+ADD SKILL FIX (CRITICAL)
+--------------------------------
+Frontend (use-skills.ts):
+- Always read userId from:
+  JSON.parse(localStorage.getItem("currentUser")).userId
+- If userId is missing → throw "User not authenticated"
+- POST /api/skills body MUST include:
+  { userId, skill_name, level }
+
+Backend:
+- Reject skill creation if userId is missing.
+- Insert skill ONLY with user_id.
+- Return 201 on success.
+
+--------------------------------
+BACKEND QUERY FIX (VERY IMPORTANT)
+--------------------------------
+ALL fetch queries MUST filter by user_id.
+
+Examples:
+SELECT * FROM skills WHERE user_id = ?
+SELECT * FROM goals WHERE user_id = ?
+SELECT * FROM companies WHERE user_id = ?
+
+DO NOT use:
+SELECT * FROM skills;
+
+--------------------------------
+DASHBOARD FIX (NO FAKE DATA)
+--------------------------------
+1. REMOVE ALL demo/mock/hardcoded values.
+   (No 47%, 65%, +2%, 2 applications, etc.)
+
+2. Initial dashboard state for NEW user:
+   Skills Average = 0%
+   Active Applications = 0
+   Goals Completed = 0
+
+3. Skills Average calculation:
+   - If user has NO skills → show 0%
+   - Calculate ONLY from that user’s skills.
+
+4. If DB returns empty arrays:
+   - Show ZERO
+   - Show empty/placeholder UI text.
+
+--------------------------------
+MULTI-USER ISOLATION (NON-NEGOTIABLE)
+--------------------------------
+- User A data must NEVER be visible to User B.
+- On login:
+  Fetch data ONLY for logged-in userId.
+- On logout:
+  Clear currentUser from localStorage.
+
+--------------------------------
+EXPECTED RESULT:
+--------------------------------
+- User A logs in → sees only their data.
+- User B logs in → sees ZERO state.
+- Add Skill works without errors.
+- Dashboard updates ONLY after user input.
+- No random or demo data anywhere.
+
+STRICT RULES:
+- Do NOT add demo data.
+- Do NOT assume progress.
+- Do NOT share data across users.
+- Fix architecture, not UI design.
+
+FINAL GOAL:
+A real multi-user, database-driven placement tracker
+with correct user-specific data isolation.

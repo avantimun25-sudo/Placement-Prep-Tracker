@@ -6,33 +6,7 @@ import { z } from "zod";
 import { insertUserSchema } from "@shared/schema";
 
 async function seedData() {
-  const existingSkills = await storage.getSkills();
-  if (existingSkills.length === 0) {
-    await storage.createSkill({ name: "JavaScript", category: "technical", proficiency: 70, targetLevel: 90 });
-    await storage.createSkill({ name: "React", category: "technical", proficiency: 60, targetLevel: 85 });
-    await storage.createSkill({ name: "Communication", category: "soft-skills", proficiency: 80, targetLevel: 100 });
-    await storage.createSkill({ name: "Problem Solving", category: "aptitude", proficiency: 50, targetLevel: 90 });
-  }
-
-  const existingCompanies = await storage.getCompanies();
-  if (existingCompanies.length === 0) {
-    await storage.createCompany({ name: "Google", role: "Software Engineer", status: "wishlist", notes: "Focus on DSA" });
-    await storage.createCompany({ name: "Microsoft", role: "SDE I", status: "applied", notes: "Applied via referral" });
-    await storage.createCompany({ name: "Amazon", role: "SDE", status: "interviewing", notes: "OA cleared" });
-  }
-
-  const existingTips = await storage.getTips();
-  if (existingTips.length === 0) {
-    await storage.createTip({ title: "STAR Method", category: "interview", content: "Situation, Task, Action, Result - use this for behavioral questions." });
-    await storage.createTip({ title: "Resume Formatting", category: "resume", content: "Keep it to one page. Use action verbs. Quantify achievements." });
-  }
-  
-  const existingGoals = await storage.getGoals();
-  if (existingGoals.length === 0) {
-    await storage.createGoal({ title: "Solve 2 LeetCode Mediums", isCompleted: false });
-    await storage.createGoal({ title: "Update Resume", isCompleted: true });
-    await storage.createGoal({ title: "Mock Interview", isCompleted: false });
-  }
+  // Seeding disabled to maintain clean user state
 }
 
 export async function registerRoutes(
@@ -241,6 +215,9 @@ export async function registerRoutes(
     const result = await storage.getTips();
     res.json(result);
   });
+
+  return httpServer;
+}
 
   return httpServer;
 }
