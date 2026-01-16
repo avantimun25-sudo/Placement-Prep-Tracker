@@ -16,6 +16,7 @@ import Goals from "@/pages/Goals";
 import Resume from "@/pages/Resume";
 import Tips from "@/pages/Tips";
 import Progress from "@/pages/Progress";
+import Profile from "@/pages/Profile";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 
@@ -60,6 +61,9 @@ function Router() {
         </Route>
         <Route path="/progress">
           <ProtectedRoute component={Progress} path="/progress" />
+        </Route>
+        <Route path="/profile">
+          <ProtectedRoute component={Profile} path="/profile" />
         </Route>
         <Route component={NotFound} />
       </Switch>
