@@ -7,7 +7,8 @@ import {
   CheckSquare, 
   FileText, 
   Lightbulb,
-  GraduationCap
+  GraduationCap,
+  LogOut
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -22,7 +23,12 @@ const navItems = [
 ];
 
 export function Sidebar() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    setLocation("/login");
+  };
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-100 p-6 hidden md:flex flex-col z-50 shadow-xl shadow-slate-200/50">
@@ -55,17 +61,27 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto px-4 py-4 bg-slate-50 rounded-2xl border border-slate-100">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Profile</p>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white text-xs font-bold shadow-md">
-            JS
-          </div>
-          <div>
-            <p className="text-sm font-bold text-slate-800">John Student</p>
-            <p className="text-xs text-slate-500">CS Final Year</p>
+      <div className="mt-auto space-y-4">
+        <div className="px-4 py-4 bg-slate-50 rounded-2xl border border-slate-100">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Profile</p>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white text-xs font-bold shadow-md">
+              JS
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-800">John Student</p>
+              <p className="text-xs text-slate-500">CS Final Year</p>
+            </div>
           </div>
         </div>
+
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200 font-medium text-sm group"
+        >
+          <LogOut className="w-5 h-5 text-slate-400 group-hover:text-red-600" />
+          Logout
+        </button>
       </div>
     </aside>
   );
