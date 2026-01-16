@@ -1,0 +1,114 @@
+Fix the "Failed to create goal" error in Goals section.
+
+ERROR DETAILS:
+- Error thrown in client/src/hooks/use-goals.ts at line 35
+- Happens when clicking Save after adding a goal
+- Backend returns non-OK response
+
+ROOT CAUSE:
+- Goal creation is not fully user-scoped
+- userId is missing or mismatched
+- Payload fields do not match backend expectations
+
+MANDATORY FIXES (DO ALL):
+
+--------------------------------
+FRONTEND – use-goals.ts
+--------------------------------
+1. Read userId ONLY from localStorage.currentUser
+
+Add at top of mutation:
+
+const currentUser = JSON.parse(
+  localStorage.getItem("currentUser") || "{}"
+);
+
+const userId = currentUser.userId;
+
+if (!userId) {
+  throw new Error("User not authenticated");
+}
+
+2. Replace goal creation request with EXACT payload:
+
+fetch("/api/goals", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    userId: userId,
+    title: data.title,
+    completed: false
+  })
+});
+
+--------------------------------
+BACKEND – CREATE GOAL API
+--------------------------------
+Backend route MUST be:
+
+app.post("/api/goals", (req, res) => {
+  const { userId, title, completed } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  if (!title) {
+    return res.status(400).json({ error: "Missing title" });
+  }
+
+  db.run(
+    `
+    INSERT INTO goals (user_id, title, completed)
+    VALUES (?, ?, ?)
+    `,
+    [userId, title, completed ? 1 : 0],
+    function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json(err);
+      }
+
+      res.status(201).json({
+        id: this.lastID,
+        title,
+        completed: false
+      });
+    }
+  );
+});
+
+--------------------------------
+DATABASE CHECK
+--------------------------------
+Ensure goals table has:
+
+goals:
+- id
+- user_id INTEGER NOT NULL
+- title TEXT NOT NULL
+- completed INTEGER DEFAULT 0
+
+--------------------------------
+FRONTEND – FETCH GOALS
+--------------------------------
+All goal fetch queries MUST use:
+
+SELECT * FROM goals WHERE user_id = ?
+
+--------------------------------
+STRICT RULES
+--------------------------------
+- Do NOT store goals in localStorage
+- Do NOT auto-create demo goals
+- Do NOT share goals between users
+- Goal must always belong to user_id
+
+EXPECTED RESULT:
+--------------------------------
+- Add Goal works without error
+- Goal appears instantly
+- Goals persist after reload
+- Each user sees only their own goals
