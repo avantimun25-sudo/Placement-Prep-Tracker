@@ -31,6 +31,9 @@ export default function Profile() {
     profileImageUrl: "",
   });
 
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+
   const { data: profile, isLoading } = useQuery({
     queryKey: ["/api/profile", userId],
     queryFn: async () => {
@@ -52,15 +55,28 @@ export default function Profile() {
         graduationYear: profile.graduationYear || 2025,
         profileImageUrl: profile.profileImageUrl || "",
       });
+      setPreviewUrl(profile.profileImageUrl || "");
     }
   }, [profile, user.email]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      const body = new FormData();
+      body.append("userId", userId.toString());
+      body.append("fullName", data.fullName);
+      body.append("email", data.email);
+      body.append("phone", data.phone);
+      body.append("department", data.department);
+      body.append("academicStatus", data.academicStatus);
+      body.append("graduationYear", data.graduationYear.toString());
+
+      if (profileImageFile) {
+        body.append("profile_image", profileImageFile);
+      }
+
       const res = await fetch("/api/profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, ...data }),
+        body,
       });
       if (!res.ok) throw new Error("Failed to update profile");
       return res.json();
@@ -68,6 +84,7 @@ export default function Profile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile", userId] });
       setIsEditing(false);
+      setProfileImageFile(null);
       toast({
         title: "Success",
         description: "Profile updated successfully!",
@@ -96,9 +113,18 @@ export default function Profile() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.type !== "image/png" && file.type !== "image/jpeg") {
+        toast({
+          title: "Error",
+          description: "Please upload only PNG or JPEG images",
+          variant: "destructive",
+        });
+        return;
+      }
+      setProfileImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, profileImageUrl: reader.result as string });
+        setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -117,9 +143,9 @@ export default function Profile() {
           <div className="flex flex-col md:flex-row gap-6 items-end -mt-16 mb-8 px-4">
             <div className="relative group">
               <div className="w-32 h-32 rounded-2xl bg-white p-1 shadow-lg overflow-hidden border border-slate-200">
-                {formData.profileImageUrl ? (
+                {previewUrl ? (
                   <img 
-                    src={formData.profileImageUrl} 
+                    src={previewUrl} 
                     alt="Profile" 
                     className="w-full h-full object-cover rounded-xl"
                   />

@@ -1,0 +1,141 @@
+Fix profile picture upload and saving issue.
+
+CURRENT ISSUE:
+- Profile details save correctly.
+- Profile photo shows preview but fails on Save Changes.
+- Error shown: "Failed to update profile"
+- Backend does not properly handle image upload.
+
+GOAL:
+- Allow user to upload profile picture.
+- Save image correctly.
+- Display image everywhere (profile page + sidebar).
+- No breaking of existing profile logic.
+
+MANDATORY IMPLEMENTATION:
+
+--------------------------------
+FRONTEND FIX (PROFILE PAGE)
+--------------------------------
+1. Profile image upload must:
+   - Use <input type="file">
+   - Accept only image/png, image/jpeg
+   - Store selected file in state (NOT base64)
+
+2. When saving profile:
+   - Use FormData (NOT JSON)
+   - Append image file only if user selected one
+
+Example:
+
+const formData = new FormData();
+formData.append("full_name", fullName);
+formData.append("phone", phone);
+formData.append("department", department);
+formData.append("academic_status", academicStatus);
+formData.append("graduation_year", graduationYear);
+
+if (profileImageFile) {
+  formData.append("profile_image", profileImageFile);
+}
+
+fetch("/api/profile", {
+  method: "PUT",
+  body: formData
+});
+
+❌ Do NOT set Content-Type manually.
+
+--------------------------------
+BACKEND FIX (PROFILE UPDATE API)
+--------------------------------
+1. Use multer for file handling:
+
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
+2. Update profile route:
+
+app.put("/api/profile", upload.single("profile_image"), (req, res) => {
+  const {
+    full_name,
+    phone,
+    department,
+    academic_status,
+    graduation_year
+  } = req.body;
+
+  const userId = req.userId || req.body.userId;
+
+  let profileImageUrl = null;
+  if (req.file) {
+    profileImageUrl = `/uploads/${req.file.filename}`;
+  }
+
+  db.run(
+    `
+    UPDATE user_profile
+    SET
+      full_name = ?,
+      phone = ?,
+      department = ?,
+      academic_status = ?,
+      graduation_year = ?,
+      profile_image_url = COALESCE(?, profile_image_url)
+    WHERE user_id = ?
+    `,
+    [
+      full_name,
+      phone,
+      department,
+      academic_status,
+      graduation_year,
+      profileImageUrl,
+      userId
+    ],
+    function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Profile update failed" });
+      }
+
+      res.json({ success: true, profileImageUrl });
+    }
+  );
+});
+
+--------------------------------
+STATIC FILE SERVING
+--------------------------------
+Add this ONCE in backend:
+
+app.use("/uploads", express.static("uploads"));
+
+--------------------------------
+SIDEBAR + PROFILE DISPLAY
+--------------------------------
+- Use profile_image_url from DB.
+- If image exists → show it.
+- Else → show initials.
+
+--------------------------------
+STRICT RULES
+--------------------------------
+- Do NOT use base64 images.
+- Do NOT store images in DB.
+- Do NOT store images in localStorage.
+- Do NOT break existing profile save logic.
+
+EXPECTED RESULT:
+- Profile photo uploads successfully.
+- Save Changes works without error.
+- Image persists after reload.
+- Image visible in sidebar and profile page.

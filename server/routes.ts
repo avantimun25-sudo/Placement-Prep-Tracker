@@ -3,7 +3,18 @@ import type { Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
-import { insertUserSchema } from "@shared/schema";
+import express from "express";
+import multer from "multer";
+import path from "path";
+
+const uploadStorage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
+
+const upload = multer({ storage: uploadStorage });
 
 async function seedData() {
   // Seeding disabled to maintain clean user state
@@ -13,6 +24,9 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Static file serving for uploads
+  app.use("/uploads", express.static("uploads"));
+
   // Auth Routes
   app.post("/api/register", async (req, res) => {
     console.log("Register request body:", JSON.stringify(req.body));
@@ -75,18 +89,23 @@ export async function registerRoutes(
     }
   });
 
-  app.put("/api/profile", async (req, res) => {
+  app.put("/api/profile", upload.single("profile_image"), async (req, res) => {
     try {
-      const { userId, fullName, email, phone, department, academicStatus, graduationYear, profileImageUrl } = req.body;
+      const { userId, fullName, email, phone, department, academicStatus, graduationYear } = req.body;
       if (!userId) return res.status(400).json({ message: "User ID required" });
       
-      const profile = await storage.upsertUserProfile(userId, {
+      let profileImageUrl = undefined;
+      if (req.file) {
+        profileImageUrl = `/uploads/${req.file.filename}`;
+      }
+
+      const profile = await storage.upsertUserProfile(parseInt(userId.toString()), {
         fullName,
         email,
         phone,
         department,
         academicStatus,
-        graduationYear,
+        graduationYear: graduationYear ? parseInt(graduationYear.toString()) : undefined,
         profileImageUrl
       });
       res.json(profile);
