@@ -23,7 +23,6 @@ export default function Resume() {
   const userId = user.userId || user.id;
 
   const [isDragging, setIsDragging] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: resume, isLoading } = useQuery({
     queryKey: ["/api/resume", userId],
@@ -99,8 +98,8 @@ export default function Resume() {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-slate-900">Resume Review</h2>
-        <p className="text-slate-500 mt-2">Upload your resume for AI analysis and score.</p>
+        <h2 className="text-3xl font-bold text-slate-900">Manage Resume</h2>
+        <p className="text-slate-500 mt-2">Upload and manage your professional resume.</p>
       </div>
 
       {!resume ? (
@@ -188,40 +187,6 @@ export default function Resume() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 border border-slate-100">
-            <div className="flex items-center gap-3 mb-6">
-              <FileText className="w-6 h-6 text-primary" />
-              <h3 className="text-lg font-bold text-slate-800">Analysis Result</h3>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="p-4 rounded-xl bg-green-50 border border-green-100">
-                <span className="text-xs font-bold text-green-600 uppercase tracking-wider">ATS Score</span>
-                <p className="text-3xl font-bold text-green-700 mt-1">92/100</p>
-              </div>
-              <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
-                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Keywords</span>
-                <p className="text-3xl font-bold text-blue-700 mt-1">15/18</p>
-              </div>
-              <div className="p-4 rounded-xl bg-orange-50 border border-orange-100">
-                <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">Format</span>
-                <p className="text-3xl font-bold text-orange-700 mt-1">Good</p>
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              <h4 className="font-semibold text-slate-700">Suggestions</h4>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 text-sm text-slate-600">
-                <AlertCircle className="w-5 h-5 text-orange-500 shrink-0" />
-                <p>Consider adding more metrics to your project descriptions (e.g., "Improved performance by 20%").</p>
-              </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 text-sm text-slate-600">
-                <AlertCircle className="w-5 h-5 text-blue-500 shrink-0" />
-                <p>Add a link to your GitHub profile or portfolio in the header.</p>
-              </div>
             </div>
           </div>
         </div>
