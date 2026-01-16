@@ -218,6 +218,3 @@ export async function registerRoutes(
 
   return httpServer;
 }
-
-  return httpServer;
-}
