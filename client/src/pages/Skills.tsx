@@ -10,11 +10,11 @@ export default function Skills() {
   const updateSkill = useUpdateSkill();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newSkill, setNewSkill] = useState({ skillName: "", category: "technical", level: 50, targetLevel: 100 });
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editValue, setEditValue] = useState<string>("");
+    const [newSkill, setNewSkill] = useState({ skillName: "", category: "technical", level: 50, targetLevel: 100 });
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editValue, setEditValue] = useState<string>("");
 
-  const categories = ["technical", "aptitude", "soft-skills"];
+    const categories = ["technical", "aptitude", "soft"];
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +67,7 @@ export default function Skills() {
                   category === 'technical' ? 'bg-indigo-500' : 
                   category === 'aptitude' ? 'bg-blue-500' : 'bg-teal-500'
                 }`} />
-                {category.replace('-', ' ')}
+                {category === 'soft' ? 'Soft Skills' : category}
               </h3>
               
               <div className="grid md:grid-cols-2 gap-6">

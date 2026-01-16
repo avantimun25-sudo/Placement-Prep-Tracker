@@ -140,10 +140,10 @@ export async function registerRoutes(
   });
 
   app.post("/api/skills", async (req, res) => {
-    const { userId, skill_name, level } = req.body;
+    const { userId, skill_name, level, category } = req.body;
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
+    if (!userId || !category) {
+      return res.status(400).json({ error: "Missing data" });
     }
 
     try {
@@ -151,7 +151,7 @@ export async function registerRoutes(
         userId: parseInt(userId.toString()),
         skillName: skill_name,
         level: level || 0,
-        category: "technical", // Defaulting to avoid schema error
+        category,
         targetLevel: 100
       });
 

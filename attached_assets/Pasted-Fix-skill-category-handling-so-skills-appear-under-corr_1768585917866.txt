@@ -1,0 +1,119 @@
+Fix skill category handling so skills appear under correct sections.
+
+CURRENT ISSUE:
+- All skills appear under "Technical"
+- Aptitude and Soft Skills are not separated
+- Skill category is ignored or defaulted
+
+GOAL:
+- Skills must be categorized correctly
+- Separate sections:
+  • Technical
+  • Aptitude
+  • Soft Skills
+
+MANDATORY FIXES (DO ALL):
+
+--------------------------------
+DATABASE FIX
+--------------------------------
+Ensure skills table has:
+
+skills:
+- id
+- user_id
+- skill_name
+- level
+- category TEXT NOT NULL
+
+--------------------------------
+ADD SKILL FORM (FRONTEND)
+--------------------------------
+1. Add Category dropdown in Add Skill modal:
+   Options:
+   - technical
+   - aptitude
+   - soft
+
+2. Category selection must be REQUIRED.
+
+--------------------------------
+FRONTEND – CREATE SKILL API
+--------------------------------
+Update skill creation payload to include category:
+
+fetch("/api/skills", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    userId: userId,
+    skill_name: data.skill_name,
+    level: data.level,
+    category: data.category
+  })
+});
+
+--------------------------------
+BACKEND – CREATE SKILL API
+--------------------------------
+Update backend to accept and store category:
+
+app.post("/api/skills", (req, res) => {
+  const { userId, skill_name, level, category } = req.body;
+
+  if (!userId || !category) {
+    return res.status(400).json({ error: "Missing data" });
+  }
+
+  db.run(
+    `
+    INSERT INTO skills (user_id, skill_name, level, category)
+    VALUES (?, ?, ?, ?)
+    `,
+    [userId, skill_name, level, category],
+    function (err) {
+      if (err) return res.status(500).json(err);
+
+      res.status(201).json({
+        id: this.lastID,
+        skill_name,
+        level,
+        category
+      });
+    }
+  );
+});
+
+--------------------------------
+FRONTEND – SKILL DISPLAY LOGIC
+--------------------------------
+Filter skills correctly:
+
+const technicalSkills = skills.filter(s => s.category === "technical");
+const aptitudeSkills  = skills.filter(s => s.category === "aptitude");
+const softSkills      = skills.filter(s => s.category === "soft");
+
+Render each list under its own section.
+
+--------------------------------
+UI FIX
+--------------------------------
+- Show three separate sections:
+  • Technical
+  • Aptitude
+  • Soft Skills
+- Show "No skills added" if empty.
+
+--------------------------------
+STRICT RULES
+--------------------------------
+- Do NOT default category to technical
+- Do NOT allow skill without category
+- Do NOT mix categories
+
+EXPECTED RESULT:
+--------------------------------
+- Aptitude skills show ONLY under Aptitude
+- Soft skills show ONLY under Soft Skills
+- Technical skills remain separate
+- Clean, logical skill tracking
