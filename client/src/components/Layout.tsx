@@ -8,8 +8,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [location] = useLocation();
 
-  // Don't show layout on landing page
-  if (location === "/") return <>{children}</>;
+  // Don't show layout on landing page or auth pages
+  if (location === "/" || location === "/login" || location === "/register") return <>{children}</>;
 
   return (
     <div className="min-h-screen bg-slate-50/50">
