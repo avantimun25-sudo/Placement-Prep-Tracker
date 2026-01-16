@@ -93,6 +93,14 @@ export default function Resume() {
     uploadMutation.mutate(file);
   };
 
+  const handleView = (resume: any) => {
+    if (!resume.url) {
+      toast({ title: "Error", description: "Resume file not found", variant: "destructive" });
+      return;
+    }
+    window.open(resume.url, "_blank");
+  };
+
   if (isLoading) return <div className="p-8 text-center text-slate-500">Checking resume status...</div>;
 
   return (
@@ -162,7 +170,7 @@ export default function Resume() {
               <Button 
                 variant="outline" 
                 className="gap-2 h-11 px-6 rounded-xl border-slate-200 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200 cursor-pointer"
-                onClick={() => window.open(resume.url, "_blank")}
+                onClick={() => handleView(resume)}
               >
                 <ExternalLink className="w-4 h-4" /> View
               </Button>
