@@ -3,8 +3,42 @@ import type { Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
+import { insertUserSchema } from "@shared/schema";
 
 async function seedData() {
+  // ... existing seed logic
+}
+
+export async function registerRoutes(
+  httpServer: Server,
+  app: Express
+): Promise<Server> {
+  // Auth Routes
+  app.post("/api/register", async (req, res) => {
+    try {
+      const result = insertUserSchema.parse(req.body);
+      const existing = await storage.getUserByEmail(result.email);
+      if (existing) return res.status(400).json({ message: "User already exists" });
+      const user = await storage.createUser(result);
+      res.status(201).json({ id: user.id, email: user.email });
+    } catch (err) {
+      res.status(400).json({ message: "Invalid data" });
+    }
+  });
+
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const user = await storage.getUserByEmail(email);
+      if (!user || user.password !== password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      res.json({ id: user.id, email: user.email });
+    } catch (err) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   const existingSkills = await storage.getSkills();
   if (existingSkills.length === 0) {
     await storage.createSkill({ name: "JavaScript", category: "technical", proficiency: 70, targetLevel: 90 });
