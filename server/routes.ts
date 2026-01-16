@@ -189,23 +189,31 @@ export async function registerRoutes(
 
   // Goals
   app.get(api.goals.list.path, async (req, res) => {
-    const userId = parseInt(req.query.userId as string);
-    if (!userId) return res.status(400).json({ message: "User ID required" });
-    const result = await storage.getGoals(userId);
-    res.json(result);
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (!userId) return res.status(401).json({ message: "User ID required" });
+      const result = await storage.getGoals(userId);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ message: "Internal Server Error" });
+    }
   });
 
   app.post(api.goals.create.path, async (req, res) => {
     try {
-      const { userId, ...data } = req.body;
-      if (!userId) return res.status(400).json({ message: "User ID required" });
-      const input = api.goals.create.input.parse(data);
-      const result = await storage.createGoal({ ...input, userId });
+      const { userId, title, completed } = req.body;
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+      if (!title) return res.status(400).json({ message: "Missing title" });
+      
+      const result = await storage.createGoal({ 
+        userId: parseInt(userId.toString()), 
+        title, 
+        isCompleted: !!completed 
+      });
       res.status(201).json(result);
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        res.status(400).json({ message: err.errors[0].message });
-      }
+      console.error(err);
+      res.status(500).json({ message: "Internal Server Error" });
     }
   });
 

@@ -21,21 +21,33 @@ export function useGoals() {
 
 export function useCreateGoal() {
   const queryClient = useQueryClient();
-  const userStr = localStorage.getItem("currentUser");
-  const user = userStr ? JSON.parse(userStr) : null;
-  const userId = user?.id;
 
   return useMutation({
-    mutationFn: async (data: InsertGoal) => {
-      const res = await fetch(api.goals.create.path, {
-        method: api.goals.create.method,
+    mutationFn: async (data: { title: string }) => {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      const userId = currentUser.id; // The UI uses .id based on login response
+
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+
+      const res = await fetch("/api/goals", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, userId }),
+        body: JSON.stringify({
+          userId: userId,
+          title: data.title,
+          completed: false
+        }),
       });
+
       if (!res.ok) throw new Error("Failed to create goal");
-      return api.goals.create.responses[201].parse(await res.json());
+      return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [api.goals.list.path, userId] }),
+    onSuccess: () => {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      queryClient.invalidateQueries({ queryKey: [api.goals.list.path, currentUser.id] });
+    },
   });
 }
 
