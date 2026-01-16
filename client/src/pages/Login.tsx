@@ -13,7 +13,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -25,20 +25,33 @@ export default function Login() {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const user = users.find((u: any) => u.email === email && u.password === password);
-
-    if (user) {
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      toast({
-        title: "Success",
-        description: "Login successful!",
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
-      setLocation("/dashboard");
-    } else {
+
+      if (response.ok) {
+        const user = await response.json();
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        toast({
+          title: "Success",
+          description: "Login successful!",
+        });
+        setLocation("/dashboard");
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.message || "Invalid email or password",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
       toast({
         title: "Error",
-        description: "Invalid email or password",
+        description: "Server connection failed",
         variant: "destructive",
       });
     }

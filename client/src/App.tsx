@@ -22,7 +22,8 @@ import { useLocation } from "wouter";
 
 function ProtectedRoute({ component: Component, path }: { component: React.ComponentType, path: string }) {
   const [location, setLocation] = useLocation();
-  const user = localStorage.getItem("currentUser");
+  const userStr = localStorage.getItem("currentUser");
+  const user = userStr ? JSON.parse(userStr) : null;
 
   useEffect(() => {
     if (!user) {

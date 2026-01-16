@@ -13,7 +13,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -25,26 +25,34 @@ export default function Register() {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    
-    if (users.find((u: any) => u.email === email)) {
+    try {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Registration successful! Please login.",
+        });
+        setLocation("/login");
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.message || "Registration failed",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
       toast({
         title: "Error",
-        description: "Email already exists",
+        description: "Server connection failed",
         variant: "destructive",
       });
-      return;
     }
-
-    users.push({ email, password });
-    localStorage.setItem("users", JSON.stringify(users));
-
-    toast({
-      title: "Success",
-      description: "Registration successful! Please login.",
-    });
-    
-    setLocation("/login");
   };
 
   return (
