@@ -25,8 +25,8 @@
         <h1>Placement Preparation Tracker</h1>
         <p>Your all-in-one companion for tracking skills, daily goals, and company preparation to land your dream job.</p>
         <div class="btn-group">
-            <a href="login.jsp" class="btn btn-primary">Login</a>
-            <a href="register.jsp" class="btn btn-secondary">Register</a>
+            <a href="login.jsp" class="btn btn-primary" data-testid="link-login">Login</a>
+            <a href="register.jsp" class="btn btn-secondary" data-testid="link-register">Register</a>
         </div>
     </div>
 </body>
