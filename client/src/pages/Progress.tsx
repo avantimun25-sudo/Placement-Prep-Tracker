@@ -88,13 +88,13 @@ export default function Progress() {
                 </RadialBarChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex flex-col gap-4 min-w-[140px]">
+            <div className="flex flex-col gap-6 min-w-[160px]">
               {categoryData.map((item, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.fill }} />
+                  <div className="w-4 h-4 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-slate-700">{item.name}</span>
-                    <span className="text-xs text-slate-500">{item.score}% Mastery</span>
+                    <span className="text-sm font-bold text-slate-800 leading-none mb-1">{item.name}</span>
+                    <span className="text-xs font-medium text-slate-500">{item.score}% Mastery</span>
                   </div>
                 </div>
               ))}
