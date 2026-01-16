@@ -2,6 +2,12 @@ import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+});
+
 export const skills = pgTable("skills", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -32,11 +38,14 @@ export const tips = pgTable("tips", {
   content: text("content").notNull(),
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertSkillSchema = createInsertSchema(skills).omit({ id: true });
 export const insertGoalSchema = createInsertSchema(goals).omit({ id: true });
 export const insertCompanySchema = createInsertSchema(companies).omit({ id: true });
 export const insertTipSchema = createInsertSchema(tips).omit({ id: true });
 
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Skill = typeof skills.$inferSelect;
 export type InsertSkill = z.infer<typeof insertSkillSchema>;
 export type Goal = typeof goals.$inferSelect;

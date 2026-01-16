@@ -38,6 +38,11 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Simple API test route
+  app.get("/api/health", async (_req, res) => {
+    res.json({ status: "ok", message: "Server is running and connected to DB" });
+  });
+
   // Seed data on startup
   seedData();
 
