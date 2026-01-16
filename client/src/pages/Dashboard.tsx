@@ -5,6 +5,7 @@ import { StatCard } from "@/components/StatCard";
 import { Trophy, Briefcase, CheckSquare, TrendingUp } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useLocation } from "wouter";
+import { calculateStats } from "@/lib/utils";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -13,16 +14,14 @@ export default function Dashboard() {
   const { data: companies = [] } = useCompanies();
 
   const completedGoals = goals.filter(g => g.isCompleted).length;
-  const pendingGoals = goals.length - completedGoals;
   const activeApplications = companies.filter(c => ['applied', 'interviewing'].includes(c.status)).length;
-  const avgProficiency = skills.length 
-    ? Math.round(skills.reduce((acc, s) => acc + (s.level || 0), 0) / skills.length) 
-    : 0;
+  
+  const stats = calculateStats(skills as any);
 
   const chartData = [
-    { name: 'Technical', value: skills.filter(s => s.category === 'technical').length },
-    { name: 'Aptitude', value: skills.filter(s => s.category === 'aptitude').length },
-    { name: 'Soft Skills', value: skills.filter(s => s.category === 'soft-skills').length },
+    { name: 'Technical', value: stats.technical.count },
+    { name: 'Aptitude', value: stats.aptitude.count },
+    { name: 'Soft Skills', value: stats.soft.count },
   ].filter(d => d.value > 0);
 
   const COLORS = ['#8b5cf6', '#3b82f6', '#10b981'];
@@ -39,7 +38,7 @@ export default function Dashboard() {
         <div onClick={() => setLocation("/skills")} className="cursor-pointer">
           <StatCard 
             label="Skills Average" 
-            value={skills.length > 0 ? `${avgProficiency}%` : "0%"} 
+            value={`${stats.overallAvg}%`} 
             icon={TrendingUp} 
             color="primary"
             trend={undefined}

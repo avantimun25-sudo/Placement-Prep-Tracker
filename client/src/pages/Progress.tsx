@@ -1,5 +1,6 @@
 import { useSkills } from "@/hooks/use-skills";
 import { useGoals } from "@/hooks/use-goals";
+import { calculateStats } from "@/lib/utils";
 import { 
   BarChart, 
   Bar, 
@@ -18,27 +19,17 @@ export default function Progress() {
   const { data: goals = [] } = useGoals();
 
   const skillsData = skills.map(skill => ({
-    name: skill.name,
-    Current: skill.proficiency || 0,
+    name: skill.skillName,
+    Current: skill.level || 0,
     Target: skill.targetLevel || 100,
   }));
 
-  const technicalProficiency = skills
-    .filter(s => s.category === 'technical')
-    .reduce((acc, s) => acc + (s.proficiency || 0), 0) / (skills.filter(s => s.category === 'technical').length || 1);
-
-  const aptitudeProficiency = skills
-    .filter(s => s.category === 'aptitude')
-    .reduce((acc, s) => acc + (s.proficiency || 0), 0) / (skills.filter(s => s.category === 'aptitude').length || 1);
-
-  const softSkillsProficiency = skills
-    .filter(s => s.category === 'soft-skills')
-    .reduce((acc, s) => acc + (s.proficiency || 0), 0) / (skills.filter(s => s.category === 'soft-skills').length || 1);
+  const stats = calculateStats(skills as any);
 
   const categoryData = [
-    { name: 'Technical', score: Math.round(technicalProficiency), fill: '#8b5cf6' },
-    { name: 'Aptitude', score: Math.round(aptitudeProficiency), fill: '#3b82f6' },
-    { name: 'Soft Skills', score: Math.round(softSkillsProficiency), fill: '#10b981' },
+    { name: 'Technical', score: stats.technical.avg, fill: '#8b5cf6' },
+    { name: 'Aptitude', score: stats.aptitude.avg, fill: '#3b82f6' },
+    { name: 'Soft Skills', score: stats.soft.avg, fill: '#10b981' },
   ];
 
   return (
@@ -98,7 +89,7 @@ export default function Progress() {
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="text-3xl font-bold text-slate-900 leading-none">
-                  {Math.round(categoryData.reduce((acc, curr) => acc + curr.score, 0) / categoryData.length)}%
+                  {stats.overallAvg}%
                 </span>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Average</span>
               </div>
