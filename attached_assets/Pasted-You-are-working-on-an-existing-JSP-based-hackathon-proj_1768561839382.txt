@@ -1,0 +1,124 @@
+You are working on an existing JSP-based hackathon project
+called "Placement Preparation Tracker".
+
+Current state of the project:
+- dashboard.jsp and other pages load directly
+- No authentication gate exists
+- UI and frontend logic already work correctly
+- Some data may be stored in localStorage
+- DO NOT redesign or rewrite existing UI
+
+GOAL:
+Add a proper login system with database persistence and
+force login before accessing the dashboard or any internal page.
+
+STRICT RULES:
+1. DO NOT change existing UI layouts or styling
+2. DO NOT auto-login users
+3. DO NOT redirect directly to dashboard.jsp on app load
+4. KEEP all existing pages and functionality intact
+
+IMPLEMENT THE FOLLOWING EXACTLY:
+
+------------------------------------------------
+A) ROUTING & ENTRY POINT (CRITICAL)
+------------------------------------------------
+- index.jsp must be the ONLY entry point
+- index.jsp must show a landing page with:
+  - App title
+  - A "Login" button
+  - Clicking Login redirects to login.jsp
+- Remove any auto-redirect from index.jsp to dashboard.jsp
+
+------------------------------------------------
+B) LOGIN & REGISTER PAGES
+------------------------------------------------
+Create:
+- login.jsp
+- register.jsp
+
+login.jsp:
+- Email
+- Password
+- Login button
+- POST to LoginServlet
+
+register.jsp:
+- Name
+- Email
+- Password
+- Register button
+- POST to RegisterServlet
+
+------------------------------------------------
+C) SESSION-BASED ACCESS CONTROL
+------------------------------------------------
+- Add session validation at the TOP of:
+  dashboard.jsp
+  skills.jsp
+  progress.jsp
+  companies.jsp
+  goals.jsp
+  resume.jsp
+  tips.jsp
+
+Session rule:
+If session.getAttribute("userId") == null
+→ redirect to login.jsp
+
+Provide the reusable JSP snippet.
+
+------------------------------------------------
+D) DATABASE INTEGRATION
+------------------------------------------------
+Use MySQL and JDBC.
+
+Create tables:
+- users(id, name, email, password)
+- skills(user_id, skill_name, progress)
+- company_notes(user_id, company_name, notes)
+- goals(user_id, goal, completed)
+
+Create:
+- DBConnection.java
+- UserDAO.java
+
+------------------------------------------------
+E) SERVLETS
+------------------------------------------------
+Create:
+1. RegisterServlet
+   - Insert user into users table
+   - Redirect to login.jsp on success
+
+2. LoginServlet
+   - Validate email & password
+   - On success:
+     - session.setAttribute("userId", userId)
+     - redirect to dashboard.jsp
+   - On failure:
+     - redirect to login.jsp with error
+
+------------------------------------------------
+F) web.xml (IMPORTANT)
+------------------------------------------------
+- welcome-file MUST be index.jsp
+- Map LoginServlet and RegisterServlet properly
+
+------------------------------------------------
+OUTPUT FORMAT:
+------------------------------------------------
+1) Explain what was changed and why
+2) Provide exact code files:
+   - index.jsp
+   - login.jsp
+   - register.jsp
+   - DBConnection.java
+   - LoginServlet.java
+   - RegisterServlet.java
+   - web.xml
+3) Provide the session-check JSP snippet
+4) DO NOT touch existing UI files
+
+This is a hackathon project.
+Correctness and stability matter more than complexity.
