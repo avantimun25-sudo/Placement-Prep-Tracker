@@ -10,77 +10,97 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User, Mail, Phone, BookOpen, GraduationCap, Calendar, X, Check } from "lucide-react";
+import { User, Mail, Phone, BookOpen, GraduationCap, Calendar, X, Check, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
   const { toast } = useToast();
-  const [userData, setUserData] = useState<any>(null);
+  const queryClient = useQueryClient();
+  const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  const userId = user.userId || user.id;
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
+    email: "",
     phone: "",
-    branch: "",
+    department: "",
     academicStatus: "",
     graduationYear: 2025,
+    profileImageUrl: "",
+  });
+
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["/api/profile", userId],
+    queryFn: async () => {
+      const res = await fetch(`/api/profile?userId=${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch profile");
+      return res.json();
+    },
+    enabled: !!userId,
   });
 
   useEffect(() => {
-    const userStr = localStorage.getItem("currentUser");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      setUserData(user);
+    if (profile) {
       setFormData({
-        name: user.name || "",
-        phone: user.phone || "",
-        branch: user.branch || "",
-        academicStatus: user.academicStatus || "",
-        graduationYear: user.graduationYear || 2025,
+        fullName: profile.fullName || "",
+        email: profile.email || user.email || "",
+        phone: profile.phone || "",
+        department: profile.department || "",
+        academicStatus: profile.academicStatus || "",
+        graduationYear: profile.graduationYear || 2025,
+        profileImageUrl: profile.profileImageUrl || "",
       });
     }
-  }, []);
+  }, [profile, user.email]);
 
-  if (!userData) return null;
-
-  const profileFields = [
-    { label: "Full Name", value: formData.name || "Not provided", icon: User },
-    { label: "Email Address", value: userData.email, icon: Mail },
-    { label: "Phone Number", value: formData.phone || "Not provided", icon: Phone },
-    { label: "Department / Branch", value: formData.branch || "Not provided", icon: BookOpen },
-    { label: "Academic Status", value: formData.academicStatus || "Not provided", icon: GraduationCap },
-    { label: "Graduation Year", value: formData.graduationYear, icon: Calendar },
-  ];
-
-  const handleSave = async () => {
-    try {
-      const response = await fetch("/api/profile", {
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userData.id, ...formData }),
+        body: JSON.stringify({ userId, ...data }),
       });
-
-      if (response.ok) {
-        const updatedUser = await response.json();
-        setUserData(updatedUser);
-        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-        setIsEditing(false);
-        toast({
-          title: "Success",
-          description: "Profile updated successfully!",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to update profile",
-          variant: "destructive",
-        });
-      }
-    } catch (err) {
+      if (!res.ok) throw new Error("Failed to update profile");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile", userId] });
+      setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully!",
+      });
+    },
+    onError: () => {
       toast({
         title: "Error",
-        description: "Server connection failed",
+        description: "Failed to update profile",
         variant: "destructive",
       });
+    },
+  });
+
+  if (isLoading) return <div className="p-8 text-center text-slate-500">Loading profile...</div>;
+
+  const profileFields = [
+    { label: "Full Name", value: profile?.fullName || "Not provided", icon: User },
+    { label: "Email Address", value: profile?.email || user.email || "Not provided", icon: Mail },
+    { label: "Phone Number", value: profile?.phone || "Not provided", icon: Phone },
+    { label: "Department / Branch", value: profile?.department || "Not provided", icon: BookOpen },
+    { label: "Academic Status", value: profile?.academicStatus || "Not provided", icon: GraduationCap },
+    { label: "Graduation Year", value: profile?.graduationYear || "Not provided", icon: Calendar },
+  ];
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, profileImageUrl: reader.result as string });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -91,84 +111,122 @@ export default function Profile() {
         <p className="text-slate-500 mt-2">View and manage your personal information</p>
       </div>
 
-      <Card className="border-slate-200 shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
-          <CardTitle className="text-xl font-bold">Personal Information</CardTitle>
-          {!isEditing ? (
-            <Button onClick={() => setIsEditing(true)} variant="outline" className="h-9 gap-2">
-              Edit Profile
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button onClick={() => setIsEditing(false)} variant="outline" className="h-9 gap-2 text-slate-500">
-                <X className="w-4 h-4" /> Cancel
-              </Button>
-              <Button 
-                onClick={handleSave} 
-                className="h-9 gap-2 bg-slate-900"
-                data-testid="button-save-profile"
-              >
-                <Check className="w-4 h-4" /> Save Changes
-              </Button>
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
+        <div className="h-32 bg-gradient-to-r from-primary/20 to-accent/20 border-b border-slate-100" />
+        <CardContent className="relative pt-0">
+          <div className="flex flex-col md:flex-row gap-6 items-end -mt-16 mb-8 px-4">
+            <div className="relative group">
+              <div className="w-32 h-32 rounded-2xl bg-white p-1 shadow-lg overflow-hidden border border-slate-200">
+                {formData.profileImageUrl ? (
+                  <img 
+                    src={formData.profileImageUrl} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-50 flex items-center justify-center rounded-xl">
+                    <User className="w-12 h-12 text-slate-300" />
+                  </div>
+                )}
+              </div>
+              {isEditing && (
+                <label className="absolute bottom-2 right-2 p-2 bg-primary text-white rounded-lg shadow-md cursor-pointer hover:bg-primary/90 transition-colors">
+                  <Camera className="w-4 h-4" />
+                  <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                </label>
+              )}
             </div>
-          )}
-        </CardHeader>
-        <CardContent>
+            <div className="flex-1 pb-2">
+              <h2 className="text-2xl font-bold text-slate-900">{profile?.fullName || "Anonymous User"}</h2>
+              <p className="text-slate-500 font-medium">{profile?.academicStatus || "Profile Incomplete"}</p>
+            </div>
+            {!isEditing ? (
+              <Button onClick={() => setIsEditing(true)} variant="outline" className="h-10 gap-2 mb-2">
+                Edit Profile
+              </Button>
+            ) : (
+              <div className="flex gap-2 mb-2">
+                <Button onClick={() => setIsEditing(false)} variant="outline" className="h-10 gap-2 text-slate-500">
+                  <X className="w-4 h-4" /> Cancel
+                </Button>
+                <Button 
+                  onClick={() => updateProfileMutation.mutate(formData)} 
+                  className="h-10 gap-2 bg-slate-900"
+                  disabled={updateProfileMutation.isPending}
+                  data-testid="button-save-profile"
+                >
+                  <Check className="w-4 h-4" /> Save Changes
+                </Button>
+              </div>
+            )}
+          </div>
+
           {!isEditing ? (
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-6">
               {profileFields.map((field, idx) => {
                 const Icon = field.icon;
                 return (
-                  <div key={idx} className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
-                    <div className="p-2.5 bg-white rounded-lg shadow-sm border border-slate-200">
+                  <div key={idx} className="flex items-start gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-slate-100/50">
+                    <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-200">
                       <Icon className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">{field.label}</p>
-                      <p className="text-slate-900 font-medium">{field.value}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{field.label}</p>
+                      <p className="text-slate-900 font-semibold">{field.value}</p>
                     </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <form className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+            <form className="grid md:grid-cols-2 gap-8 py-4">
+              <div className="space-y-3">
+                <Label htmlFor="fullName" className="text-xs font-bold uppercase text-slate-500 tracking-wider">Full Name</Label>
                 <Input 
-                  id="name" 
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  id="fullName" 
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  placeholder="Enter your full name"
+                  className="h-11 rounded-xl"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" value={userData.email} disabled className="bg-slate-50" />
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-xs font-bold uppercase text-slate-500 tracking-wider">Email Address</Label>
+                <Input 
+                  id="email" 
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="Enter your email"
+                  className="h-11 rounded-xl"
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+              <div className="space-y-3">
+                <Label htmlFor="phone" className="text-xs font-bold uppercase text-slate-500 tracking-wider">Phone Number</Label>
                 <Input 
                   id="phone" 
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="Enter phone number"
+                  className="h-11 rounded-xl"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="branch">Department / Branch</Label>
+              <div className="space-y-3">
+                <Label htmlFor="department" className="text-xs font-bold uppercase text-slate-500 tracking-wider">Department / Branch</Label>
                 <Input 
-                  id="branch" 
-                  value={formData.branch}
-                  onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                  id="department" 
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  placeholder="e.g. Computer Science"
+                  className="h-11 rounded-xl"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Academic Status</Label>
+              <div className="space-y-3">
+                <Label htmlFor="status" className="text-xs font-bold uppercase text-slate-500 tracking-wider">Academic Status</Label>
                 <Select 
                   value={formData.academicStatus}
                   onValueChange={(value) => setFormData({ ...formData, academicStatus: value })}
                 >
-                  <SelectTrigger id="status">
+                  <SelectTrigger id="status" className="h-11 rounded-xl">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -179,13 +237,14 @@ export default function Profile() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="gradYear">Graduation Year</Label>
+              <div className="space-y-3">
+                <Label htmlFor="gradYear" className="text-xs font-bold uppercase text-slate-500 tracking-wider">Graduation Year</Label>
                 <Input 
                   id="gradYear" 
                   type="number" 
                   value={formData.graduationYear}
                   onChange={(e) => setFormData({ ...formData, graduationYear: parseInt(e.target.value) || 0 })}
+                  className="h-11 rounded-xl"
                 />
               </div>
             </form>

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, 
@@ -8,9 +9,11 @@ import {
   FileText, 
   Lightbulb,
   GraduationCap,
-  LogOut
+  LogOut,
+  User as UserIcon
 } from "lucide-react";
 import { clsx } from "clsx";
+import { useQuery } from "@tanstack/react-query";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -24,18 +27,34 @@ const navItems = [
 
 export function Sidebar() {
   const [location, setLocation] = useLocation();
-  const userData = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  const userId = user.userId || user.id;
+
+  const { data: profile } = useQuery({
+    queryKey: ["/api/profile", userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      const res = await fetch(`/api/profile?userId=${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch profile");
+      return res.json();
+    },
+    enabled: !!userId,
+  });
   
-  const initials = (userData.name || "John Student")
-    .split(" ")
-    .map((n: string) => n[0])
-    .join("")
-    .toUpperCase();
+  const initials = profile?.fullName
+    ? profile.fullName
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+    : "";
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
     setLocation("/login");
   };
+
+  const isProfileIncomplete = !profile?.fullName;
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-100 p-6 hidden md:flex flex-col z-50 shadow-xl shadow-slate-200/50">
@@ -75,12 +94,26 @@ export function Sidebar() {
         >
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Profile</p>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white text-xs font-bold shadow-md">
-              {initials}
-            </div>
+            {profile?.profileImageUrl ? (
+              <img 
+                src={profile.profileImageUrl} 
+                alt="Profile" 
+                className="w-8 h-8 rounded-full shadow-md object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white text-xs font-bold shadow-md">
+                {initials || <UserIcon className="w-4 h-4" />}
+              </div>
+            )}
             <div>
-              <p className="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors line-clamp-1">{userData.name || "John Student"}</p>
-              <p className="text-xs text-slate-500 line-clamp-1">{userData.status || "Final Year"}</p>
+              {isProfileIncomplete ? (
+                <p className="text-sm font-bold text-primary animate-pulse">Complete your profile</p>
+              ) : (
+                <>
+                  <p className="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors line-clamp-1">{profile.fullName}</p>
+                  <p className="text-xs text-slate-500 line-clamp-1">{profile.academicStatus || "Student"}</p>
+                </>
+              )}
             </div>
           </div>
         </button>

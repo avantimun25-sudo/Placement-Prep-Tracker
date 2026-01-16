@@ -25,11 +25,6 @@ export async function registerRoutes(
       const user = await storage.createUser({
         email,
         password,
-        name: null,
-        phone: null,
-        branch: null,
-        academicStatus: null,
-        graduationYear: null,
       });
 
       res.status(201).json({ id: user.id, email: user.email });
@@ -69,20 +64,34 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/profile", async (req, res) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      const profile = await storage.getUserProfile(userId);
+      res.json(profile || {});
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
   app.put("/api/profile", async (req, res) => {
     try {
-      const { userId, name, phone, branch, academicStatus, graduationYear } = req.body;
+      const { userId, fullName, email, phone, department, academicStatus, graduationYear, profileImageUrl } = req.body;
       if (!userId) return res.status(400).json({ message: "User ID required" });
       
-      const user = await storage.updateUser(userId, {
-        name,
+      const profile = await storage.upsertUserProfile(userId, {
+        fullName,
+        email,
         phone,
-        branch,
+        department,
         academicStatus,
-        graduationYear
+        graduationYear,
+        profileImageUrl
       });
-      res.json(user);
+      res.json(profile);
     } catch (err) {
+      console.error("Profile update error:", err);
       res.status(500).json({ message: "Failed to update profile" });
     }
   });

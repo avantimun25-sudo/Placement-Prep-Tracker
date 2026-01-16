@@ -6,11 +6,18 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  name: text("name"),
+});
+
+export const userProfiles = pgTable("user_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  fullName: text("full_name"),
+  email: text("email"),
   phone: text("phone"),
-  branch: text("branch"),
+  department: text("department"),
   academicStatus: text("academic_status"),
   graduationYear: integer("graduation_year"),
+  profileImageUrl: text("profile_image_url"),
 });
 
 export const skills = pgTable("skills", {
@@ -47,6 +54,7 @@ export const tips = pgTable("tips", {
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({ id: true });
 export const insertSkillSchema = createInsertSchema(skills).omit({ id: true });
 export const insertGoalSchema = createInsertSchema(goals).omit({ id: true });
 export const insertCompanySchema = createInsertSchema(companies).omit({ id: true });
@@ -54,6 +62,8 @@ export const insertTipSchema = createInsertSchema(tips).omit({ id: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
 export type Skill = typeof skills.$inferSelect;
 export type InsertSkill = z.infer<typeof insertSkillSchema>;
 export type Goal = typeof goals.$inferSelect;

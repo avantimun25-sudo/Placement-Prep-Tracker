@@ -1,4 +1,4 @@
-import { users, skills, goals, companies, tips, type User, type InsertUser, type Skill, type InsertSkill, type Goal, type InsertGoal, type Company, type InsertCompany, type Tip, type InsertTip } from "@shared/schema";
+import { users, userProfiles, skills, goals, companies, tips, type User, type InsertUser, type UserProfile, type InsertUserProfile, type Skill, type InsertSkill, type Goal, type InsertGoal, type Company, type InsertCompany, type Tip, type InsertTip } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -7,7 +7,10 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  updateUser(id: number, updates: Partial<User>): Promise<User>;
+
+  // User Profile
+  getUserProfile(userId: number): Promise<UserProfile | undefined>;
+  upsertUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
 
   // Skills
   getSkills(userId: number): Promise<Skill[]>;
@@ -46,10 +49,27 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUser(id: number, updates: Partial<User>): Promise<User> {
-    const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
-    if (!user) throw new Error("User not found");
-    return user;
+  async getUserProfile(userId: number): Promise<UserProfile | undefined> {
+    const [profile] = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId));
+    return profile;
+  }
+
+  async upsertUserProfile(userId: number, updates: Partial<InsertUserProfile>): Promise<UserProfile> {
+    const existing = await this.getUserProfile(userId);
+    if (existing) {
+      const [updated] = await db
+        .update(userProfiles)
+        .set(updates)
+        .where(eq(userProfiles.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      const [inserted] = await db
+        .insert(userProfiles)
+        .values({ ...updates, userId } as InsertUserProfile)
+        .returning();
+      return inserted;
+    }
   }
 
   async getSkills(userId: number): Promise<Skill[]> {

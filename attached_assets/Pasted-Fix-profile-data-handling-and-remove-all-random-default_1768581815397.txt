@@ -1,0 +1,111 @@
+Fix profile data handling and remove all random/default values.
+
+CURRENT ISSUES:
+1. After login, sidebar profile shows random name like "John Student"
+   and random academic year.
+2. These values are NOT entered by the user.
+3. Profile page shows "Not provided" but sidebar still shows fake data.
+4. No option to upload profile picture.
+
+GOAL:
+- Profile data must come ONLY from user input.
+- Sidebar profile must reflect saved profile data.
+- No random, hardcoded, or demo values anywhere.
+
+MANDATORY CHANGES:
+
+--------------------------------
+PROFILE DATA SOURCE OF TRUTH
+--------------------------------
+1. Create a dedicated `user_profile` table:
+
+user_profile:
+- id
+- user_id (FK, UNIQUE)
+- full_name
+- email
+- phone
+- department
+- academic_status
+- graduation_year
+- profile_image_url
+
+2. On FIRST login:
+- Do NOT show any name, year, or avatar.
+- Sidebar should show:
+  "Complete your profile"
+
+--------------------------------
+REMOVE ALL HARDCODED VALUES
+--------------------------------
+REMOVE:
+- "John Student"
+- "Final Year"
+- "2025"
+- Any fallback profile values
+
+DO NOT:
+- Auto-generate names
+- Auto-fill academic year
+- Assume profile data exists
+
+--------------------------------
+PROFILE PAGE BEHAVIOR
+--------------------------------
+1. Profile page must:
+- Fetch data ONLY from user_profile table
+- Show "Not provided" if field is empty
+
+2. Add "Edit Profile" mode:
+- Allow user to input:
+  full name
+  phone number
+  department / branch
+  academic status
+  graduation year
+
+3. Add PROFILE PICTURE UPLOAD:
+- Image upload field in Edit Profile
+- Accept JPG / PNG
+- Store image URL in profile_image_url
+- Show preview before saving
+
+--------------------------------
+SIDEBAR PROFILE SYNC
+--------------------------------
+Sidebar profile card must:
+- Fetch data from user_profile table
+- Show initials ONLY if full_name exists
+- Show profile picture if uploaded
+- If profile incomplete:
+  Display "Complete your profile"
+
+--------------------------------
+SAVE & FETCH LOGIC
+--------------------------------
+- On save profile:
+  UPSERT profile using user_id
+- On login:
+  Fetch profile by user_id
+- If no profile exists:
+  Return empty object
+
+--------------------------------
+STRICT RULES
+--------------------------------
+- No random data
+- No demo data
+- No assumptions
+- No hardcoded profile info
+- Sidebar and Profile page must use SAME data source
+
+EXPECTED RESULT:
+- After login → empty profile state
+- User fills profile page → data saved
+- Sidebar updates instantly
+- Profile picture appears everywhere
+- Data persists across devices
+
+FINAL GOAL:
+A real user-driven profile system
+with zero fake data and full synchronization.
