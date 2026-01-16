@@ -73,18 +73,32 @@ export default function Progress() {
         {/* Category Radar/Radial */}
         <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-6">Domain Mastery</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadialBarChart cx="50%" cy="50%" innerRadius="10%" outerRadius="80%" barSize={20} data={categoryData}>
-                <RadialBar
-                  label={{ position: 'insideStart', fill: '#fff' }}
-                  background
-                  dataKey="score"
-                />
-                <Legend iconSize={10} layout="vertical" verticalAlign="middle" wrapperStyle={{ right: 0 }} />
-                <Tooltip />
-              </RadialBarChart>
-            </ResponsiveContainer>
+          <div className="flex flex-col md:flex-row items-center justify-between h-80 gap-6">
+            <div className="flex-1 w-full h-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart cx="50%" cy="50%" innerRadius="30%" outerRadius="100%" barSize={15} data={categoryData}>
+                  <RadialBar
+                    background
+                    dataKey="score"
+                    cornerRadius={10}
+                  />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-col gap-4 min-w-[140px]">
+              {categoryData.map((item, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.fill }} />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-slate-700">{item.name}</span>
+                    <span className="text-xs text-slate-500">{item.score}% Mastery</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
