@@ -21,21 +21,40 @@ export function useCompanies() {
 
 export function useCreateCompany() {
   const queryClient = useQueryClient();
-  const userStr = localStorage.getItem("currentUser");
-  const user = userStr ? JSON.parse(userStr) : null;
-  const userId = user?.id;
 
   return useMutation({
-    mutationFn: async (data: InsertCompany) => {
-      const res = await fetch(api.companies.create.path, {
-        method: api.companies.create.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, userId }),
+    mutationFn: async (data: any) => {
+      const currentUser = JSON.parse(
+        localStorage.getItem("currentUser") || "{}"
+      );
+
+      const userId = currentUser.userId || currentUser.id;
+
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+
+      const res = await fetch("/api/companies", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId: userId,
+          company_name: data.companyName || data.name,
+          role: data.role,
+          status: data.status // must be "applied" or "interviewing"
+        })
       });
+
       if (!res.ok) throw new Error("Failed to create company");
-      return api.companies.create.responses[201].parse(await res.json());
+      return await res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [api.companies.list.path, userId] }),
+    onSuccess: () => {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      const userId = currentUser.userId || currentUser.id;
+      queryClient.invalidateQueries({ queryKey: [api.companies.list.path, userId] });
+    },
   });
 }
 

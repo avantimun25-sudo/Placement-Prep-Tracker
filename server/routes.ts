@@ -229,17 +229,30 @@ export async function registerRoutes(
     res.json(result);
   });
 
-  app.post(api.companies.create.path, async (req, res) => {
+  app.post("/api/companies", async (req, res) => {
+    const { userId, company_name, role, status } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!company_name || !role || !status) {
+      return res.status(400).json({ error: "Missing fields" });
+    }
+
     try {
-      const { userId, ...data } = req.body;
-      if (!userId) return res.status(400).json({ message: "User ID required" });
-      const input = api.companies.create.input.parse(data);
-      const result = await storage.createCompany({ ...input, userId });
+      const result = await storage.createCompany({
+        userId: parseInt(userId.toString()),
+        companyName: company_name,
+        role,
+        status,
+        notes: null
+      });
+
       res.status(201).json(result);
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        res.status(400).json({ message: err.errors[0].message });
-      }
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   });
 

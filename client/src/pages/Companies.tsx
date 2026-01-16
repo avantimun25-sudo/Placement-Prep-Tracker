@@ -10,7 +10,7 @@ export default function Companies() {
   const updateCompany = useUpdateCompany();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newCompany, setNewCompany] = useState({ name: "", role: "", status: "applied", notes: "" });
+  const [newCompany, setNewCompany] = useState({ companyName: "", role: "", status: "applied", notes: "" });
 
   const statuses = [
     { id: 'applied', label: 'Applied', color: 'bg-blue-50 text-blue-600 border-blue-200' },
@@ -21,7 +21,7 @@ export default function Companies() {
     e.preventDefault();
     await createCompany.mutateAsync(newCompany);
     setIsModalOpen(false);
-    setNewCompany({ name: "", role: "", status: "applied", notes: "" });
+    setNewCompany({ companyName: "", role: "", status: "applied", notes: "" });
   };
 
   return (
@@ -63,7 +63,7 @@ export default function Companies() {
                         <Building2 className="w-5 h-5" />
                       </div>
                     </div>
-                    <h4 className="font-bold text-slate-800">{company.name}</h4>
+                    <h4 className="font-bold text-slate-800">{company.companyName}</h4>
                     <p className="text-sm text-slate-500 mb-3">{company.role}</p>
                     
                     <select 
@@ -110,8 +110,8 @@ export default function Companies() {
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Company Name</label>
                   <input 
                     required
-                    value={newCompany.name}
-                    onChange={(e) => setNewCompany({...newCompany, name: e.target.value})}
+                    value={newCompany.companyName}
+                    onChange={(e) => setNewCompany({...newCompany, companyName: e.target.value})}
                     placeholder="e.g. Google, Amazon"
                     className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />

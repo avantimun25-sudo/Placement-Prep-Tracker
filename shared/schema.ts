@@ -48,9 +48,9 @@ export const goals = pgTable("goals", {
 export const companies = pgTable("companies", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
-  name: text("name").notNull(),
+  companyName: text("company_name").notNull(),
   role: text("role").notNull(),
-  status: text("status").notNull(), // 'wishlist', 'applied', 'interviewing', 'offer', 'rejected'
+  status: text("status").notNull(), // 'applied', 'interviewing'
   notes: text("notes"),
 });
 
