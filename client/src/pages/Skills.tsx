@@ -1,6 +1,6 @@
 import { useSkills, useCreateSkill, useDeleteSkill, useUpdateSkill } from "@/hooks/use-skills";
 import { useState } from "react";
-import { Plus, Trash2, Edit2, X } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Skills() {
@@ -11,6 +11,8 @@ export default function Skills() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({ name: "", category: "technical", proficiency: 50, targetLevel: 100 });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editValue, setEditValue] = useState<string>("");
 
   const categories = ["technical", "aptitude", "soft-skills"];
 
@@ -19,6 +21,20 @@ export default function Skills() {
     await createSkill.mutateAsync(newSkill);
     setIsModalOpen(false);
     setNewSkill({ name: "", category: "technical", proficiency: 50, targetLevel: 100 });
+  };
+
+  const startEditing = (id: number, currentProficiency: number) => {
+    setEditingId(id);
+    setEditValue(currentProficiency.toString());
+  };
+
+  const handleSave = async (id: number) => {
+    const proficiency = parseInt(editValue);
+    if (isNaN(proficiency) || proficiency < 0 || proficiency > 100) {
+      return;
+    }
+    await updateSkill.mutateAsync({ id, proficiency });
+    setEditingId(null);
   };
 
   if (isLoading) return <div className="p-8 text-center text-slate-500">Loading skills...</div>;
@@ -59,18 +75,62 @@ export default function Skills() {
                   <div key={skill.id} className="group p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-primary/20 transition-colors">
                     <div className="flex justify-between items-start mb-3">
                       <h4 className="font-bold text-slate-700">{skill.name}</h4>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={() => deleteSkill.mutate(skill.id)}
-                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <div className="flex gap-2">
+                        {editingId === skill.id ? (
+                          <>
+                            <button 
+                              onClick={() => handleSave(skill.id)}
+                              className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                              title="Save"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => setEditingId(null)}
+                              className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors"
+                              title="Cancel"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button 
+                              onClick={() => startEditing(skill.id, skill.proficiency || 0)}
+                              className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                              title="Edit"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => deleteSkill.mutate(skill.id)}
+                              className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                     
                       <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
-                        <span>Current: {skill.proficiency}%</span>
+                        <div className="flex items-center gap-2">
+                          <span>Current:</span>
+                          {editingId === skill.id ? (
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              className="w-16 px-1 py-0.5 rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-primary text-slate-800 font-bold"
+                              autoFocus
+                            />
+                          ) : (
+                            <span className="text-slate-700 font-bold">{skill.proficiency}%</span>
+                          )}
+                        </div>
                         <span>Target: {skill.targetLevel}%</span>
                       </div>
                       <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden relative">
@@ -82,15 +142,6 @@ export default function Skills() {
                             category === 'technical' ? 'bg-indigo-500' : 
                             category === 'aptitude' ? 'bg-blue-500' : 'bg-teal-500'
                           }`}
-                        />
-                        <input 
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={skill.proficiency || 0}
-                          onChange={(e) => updateSkill.mutate({ id: skill.id, proficiency: parseInt(e.target.value) })}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          title="Slide to update proficiency"
                         />
                       </div>
                   </div>
