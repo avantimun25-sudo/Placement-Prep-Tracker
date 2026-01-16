@@ -40,9 +40,10 @@ export default function Register() {
         setLocation("/login");
       } else {
         const error = await response.json();
+        const errorMessage = response.status === 409 ? "User already exists" : (error.message || "Registration failed");
         toast({
           title: "Error",
-          description: error.message || "Registration failed",
+          description: errorMessage,
           variant: "destructive",
         });
       }

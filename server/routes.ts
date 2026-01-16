@@ -41,14 +41,14 @@ export async function registerRoutes(
 ): Promise<Server> {
   // Auth Routes
   app.post("/api/register", async (req, res) => {
-    console.log("Register request body:", req.body);
+    console.log("Register request body:", JSON.stringify(req.body));
     try {
       const { email, password } = req.body;
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
       }
 
-      // Check if user exists first to provide clear error
+      // Check if user exists first
       const existing = await storage.getUserByEmail(email);
       if (existing) {
         return res.status(409).json({ message: "User already exists" });
@@ -66,12 +66,18 @@ export async function registerRoutes(
 
       res.status(201).json({ id: user.id, email: user.email });
     } catch (err: any) {
-      console.error("Registration error:", err);
-      // Handle SQLite/Postgres unique constraint if check above missed a race condition
-      if (err.code === '23505' || err.message?.includes('unique constraint')) {
+      console.error("Registration error fully logged:", {
+        code: err.code,
+        message: err.message,
+        detail: err.detail,
+        stack: err.stack
+      });
+      
+      // Handle SQLite/Postgres unique constraint
+      if (err.code === '23505' || err.message?.includes('UNIQUE constraint failed')) {
         return res.status(409).json({ message: "User already exists" });
       }
-      res.status(500).json({ message: "Failed to register user" });
+      res.status(500).json({ message: "Registration failed", error: err.message });
     }
   });
 
