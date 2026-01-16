@@ -32,7 +32,11 @@ export default function CompanyNotes() {
         await updateNote.mutateAsync({ id: editingId, title: newTitle, content: newContent });
         toast({ title: "Success", description: "Note updated successfully" });
       } else {
+        const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+        const userId = currentUser.id;
+        
         await createNote.mutateAsync({
+          userId,
           companyId: parseInt(selectedCompanyId),
           title: newTitle,
           content: newContent
