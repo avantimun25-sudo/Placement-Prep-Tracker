@@ -17,7 +17,7 @@ export default function Home() {
           </div>
           <span className="font-bold text-xl text-slate-900">PrepTracker</span>
         </div>
-        <Link href="/dashboard" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">
+        <Link href="/login" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">
           Log In
         </Link>
       </header>
@@ -45,7 +45,7 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-              <Link href="/dashboard" className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-xl shadow-slate-900/20">
+              <Link href="/login" className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-xl shadow-slate-900/20">
                 Start Preparing
                 <ArrowRight className="w-4 h-4" />
               </Link>
