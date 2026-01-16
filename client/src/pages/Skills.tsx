@@ -69,12 +69,11 @@ export default function Skills() {
                       </div>
                     </div>
                     
-                    <div className="relative pt-2">
                       <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
                         <span>Current: {skill.proficiency}%</span>
                         <span>Target: {skill.targetLevel}%</span>
                       </div>
-                      <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                      <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden relative">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: `${skill.proficiency}%` }}
@@ -84,19 +83,16 @@ export default function Skills() {
                             category === 'aptitude' ? 'bg-blue-500' : 'bg-teal-500'
                           }`}
                         />
+                        <input 
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={skill.proficiency || 0}
+                          onChange={(e) => updateSkill.mutate({ id: skill.id, proficiency: parseInt(e.target.value) })}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          title="Slide to update proficiency"
+                        />
                       </div>
-                      
-                      {/* Simple Proficiency Slider Update */}
-                      <input 
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={skill.proficiency || 0}
-                        onChange={(e) => updateSkill.mutate({ id: skill.id, proficiency: parseInt(e.target.value) })}
-                        className="absolute inset-0 w-full opacity-0 cursor-pointer"
-                        title="Drag to update proficiency"
-                      />
-                    </div>
                   </div>
                 ))}
               </div>
