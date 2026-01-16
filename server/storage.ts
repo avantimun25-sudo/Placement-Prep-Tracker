@@ -1,4 +1,4 @@
-import { users, userProfiles, skills, goals, companies, tips, type User, type InsertUser, type UserProfile, type InsertUserProfile, type Skill, type InsertSkill, type Goal, type InsertGoal, type Company, type InsertCompany, type Tip, type InsertTip } from "@shared/schema";
+import { users, userProfiles, resumes, skills, goals, companies, tips, type User, type InsertUser, type UserProfile, type InsertUserProfile, type Resume, type InsertResume, type Skill, type InsertSkill, type Goal, type InsertGoal, type Company, type InsertCompany, type Tip, type InsertTip } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -11,6 +11,11 @@ export interface IStorage {
   // User Profile
   getUserProfile(userId: number): Promise<UserProfile | undefined>;
   upsertUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
+
+  // Resumes
+  getResume(userId: number): Promise<Resume | undefined>;
+  createResume(resume: InsertResume): Promise<Resume>;
+  deleteResume(userId: number): Promise<void>;
 
   // Skills
   getSkills(userId: number): Promise<Skill[]>;
@@ -70,6 +75,20 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return inserted;
     }
+  }
+
+  async getResume(userId: number): Promise<Resume | undefined> {
+    const [resume] = await db.select().from(resumes).where(eq(resumes.userId, userId));
+    return resume;
+  }
+
+  async createResume(insertResume: InsertResume): Promise<Resume> {
+    const [resume] = await db.insert(resumes).values(insertResume).returning();
+    return resume;
+  }
+
+  async deleteResume(userId: number): Promise<void> {
+    await db.delete(resumes).where(eq(resumes.userId, userId));
   }
 
   async getSkills(userId: number): Promise<Skill[]> {

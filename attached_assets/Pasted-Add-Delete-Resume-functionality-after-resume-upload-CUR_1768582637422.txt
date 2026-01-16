@@ -1,0 +1,98 @@
+Add Delete Resume functionality after resume upload.
+
+CURRENT STATE:
+- Resume upload works (PDF only).
+- Uploaded resume is stored for the logged-in user.
+- No option to remove or replace resume.
+
+GOAL:
+- Allow user to delete their uploaded resume.
+- Resume must be deleted from database AND storage.
+- UI should update instantly after deletion.
+
+MANDATORY CHANGES:
+
+--------------------------------
+DATABASE
+--------------------------------
+Ensure resume table contains:
+
+resume:
+- id
+- user_id
+- file_name
+- file_path
+- uploaded_at
+
+--------------------------------
+BACKEND – DELETE RESUME API
+--------------------------------
+Add DELETE endpoint:
+
+DELETE /api/resume
+
+Implementation:
+
+app.delete("/api/resume", (req, res) => {
+  const userId = req.userId || req.body.userId;
+
+  db.get(
+    "SELECT file_path FROM resume WHERE user_id = ?",
+    [userId],
+    (err, row) => {
+      if (err) return res.status(500).json(err);
+      if (!row) return res.status(404).json({ error: "No resume found" });
+
+      fs.unlink(row.file_path, (fsErr) => {
+        if (fsErr) console.error(fsErr);
+
+        db.run(
+          "DELETE FROM resume WHERE user_id = ?",
+          [userId],
+          () => res.json({ success: true })
+        );
+      });
+    }
+  );
+});
+
+--------------------------------
+FRONTEND – UI CHANGES
+--------------------------------
+After successful upload:
+- Show uploaded file name
+- Show two buttons:
+  1. Replace Resume
+  2. Delete Resume (danger style)
+
+Delete button behavior:
+- Show confirmation modal:
+  "Are you sure you want to delete your resume?"
+- On confirm:
+  Call DELETE /api/resume
+- On success:
+  Clear resume state
+  Show upload box again
+
+--------------------------------
+FRONTEND – FETCH LOGIC
+--------------------------------
+On page load:
+- Fetch resume status for logged-in user
+- If resume exists → show file info + delete button
+- If not → show upload UI
+
+--------------------------------
+STRICT RULES
+--------------------------------
+- Resume deletion must be user-specific.
+- User cannot delete another user's resume.
+- No hardcoded data.
+- No page reload required.
+
+EXPECTED RESULT:
+- User uploads resume.
+- Resume appears with filename.
+- User clicks Delete Resume.
+- Resume removed from DB and storage.
+- Upload UI reappears.

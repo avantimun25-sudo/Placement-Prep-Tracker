@@ -6,6 +6,7 @@ import { z } from "zod";
 import express from "express";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 
 const uploadStorage = multer.diskStorage({
   destination: "uploads/",
@@ -14,7 +15,15 @@ const uploadStorage = multer.diskStorage({
   }
 });
 
+const resumeStorage = multer.diskStorage({
+  destination: "resumes/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
+
 const upload = multer({ storage: uploadStorage });
+const resumeUpload = multer({ storage: resumeStorage });
 
 async function seedData() {
   // Seeding disabled to maintain clean user state
@@ -251,6 +260,64 @@ export async function registerRoutes(
   app.get(api.tips.list.path, async (_req, res) => {
     const result = await storage.getTips();
     res.json(result);
+  });
+
+  // Resumes
+  app.get("/api/resume", async (req, res) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      const resume = await storage.getResume(userId);
+      res.json(resume || null);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch resume" });
+    }
+  });
+
+  app.post("/api/resume", resumeUpload.single("resume"), async (req, res) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+      const existing = await storage.getResume(parseInt(userId));
+      if (existing) {
+        if (fs.existsSync(existing.filePath)) {
+          fs.unlinkSync(existing.filePath);
+        }
+        await storage.deleteResume(parseInt(userId));
+      }
+
+      const resume = await storage.createResume({
+        userId: parseInt(userId),
+        fileName: req.file.originalname,
+        filePath: req.file.path,
+      });
+
+      res.status(201).json(resume);
+    } catch (err) {
+      console.error("Resume upload error:", err);
+      res.status(500).json({ message: "Failed to upload resume" });
+    }
+  });
+
+  app.delete("/api/resume", async (req, res) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (!userId) return res.status(400).json({ message: "User ID required" });
+
+      const resume = await storage.getResume(userId);
+      if (!resume) return res.status(404).json({ message: "No resume found" });
+
+      if (fs.existsSync(resume.filePath)) {
+        fs.unlinkSync(resume.filePath);
+      }
+      await storage.deleteResume(userId);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Resume delete error:", err);
+      res.status(500).json({ message: "Failed to delete resume" });
+    }
   });
 
   return httpServer;

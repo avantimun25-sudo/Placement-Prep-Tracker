@@ -20,6 +20,14 @@ export const userProfiles = pgTable("user_profiles", {
   profileImageUrl: text("profile_image_url"),
 });
 
+export const resumes = pgTable("resumes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  fileName: text("file_name").notNull(),
+  filePath: text("file_path").notNull(),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+});
+
 export const skills = pgTable("skills", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -59,11 +67,14 @@ export const insertSkillSchema = createInsertSchema(skills).omit({ id: true });
 export const insertGoalSchema = createInsertSchema(goals).omit({ id: true });
 export const insertCompanySchema = createInsertSchema(companies).omit({ id: true });
 export const insertTipSchema = createInsertSchema(tips).omit({ id: true });
+export const insertResumeSchema = createInsertSchema(resumes).omit({ id: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+export type Resume = typeof resumes.$inferSelect;
+export type InsertResume = z.infer<typeof insertResumeSchema>;
 export type Skill = typeof skills.$inferSelect;
 export type InsertSkill = z.infer<typeof insertSkillSchema>;
 export type Goal = typeof goals.$inferSelect;
