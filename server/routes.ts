@@ -102,21 +102,25 @@ export async function registerRoutes(
     res.json(result);
   });
 
-  app.post(api.skills.create.path, async (req, res) => {
+  app.post("/api/skills", async (req, res) => {
+    const { userId, skill_name, level } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     try {
-      const { userId, skill_name, level, category, targetLevel } = req.body;
-      if (!userId) return res.status(401).json({ error: "Unauthorized" });
-      
-      const result = await storage.createSkill({ 
-        skillName: skill_name, 
-        level: level, 
-        userId,
-        category: category || "technical",
-        targetLevel: targetLevel || 100
+      const result = await storage.createSkill({
+        userId: parseInt(userId.toString()),
+        skillName: skill_name,
+        level: level || 0,
+        category: "technical", // Defaulting to avoid schema error
+        targetLevel: 100
       });
+
       res.status(201).json(result);
     } catch (err) {
-      console.error("Skill creation error:", err);
+      console.error(err);
       res.status(500).json({ error: "Internal Server Error" });
     }
   });

@@ -21,28 +21,39 @@ export function useSkills() {
 
 export function useCreateSkill() {
   const queryClient = useQueryClient();
-  const userStr = localStorage.getItem("currentUser");
-  const user = userStr ? JSON.parse(userStr) : null;
-  const userId = user?.id;
 
   return useMutation({
-    mutationFn: async (data: InsertSkill) => {
-      if (!userId) throw new Error("User not authenticated");
-      const res = await fetch(api.skills.create.path, {
-        method: api.skills.create.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          userId, 
-          skill_name: data.skillName, 
-          level: data.level,
-          category: data.category,
-          targetLevel: data.targetLevel
-        }),
+    mutationFn: async (data: any) => {
+      const currentUser = JSON.parse(
+        localStorage.getItem("currentUser") || "{}"
+      );
+
+      const userId = currentUser.userId || currentUser.id;
+
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+
+      const res = await fetch("/api/skills", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId: userId,
+          skill_name: data.name || data.skillName,
+          level: data.level
+        })
       });
+
       if (!res.ok) throw new Error("Failed to create skill");
       return await res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [api.skills.list.path, userId] }),
+    onSuccess: () => {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      const userId = currentUser.userId || currentUser.id;
+      queryClient.invalidateQueries({ queryKey: [api.skills.list.path, userId] });
+    },
   });
 }
 

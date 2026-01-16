@@ -17,7 +17,7 @@ export const skills = pgTable("skills", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   skillName: text("skill_name").notNull(),
-  category: text("category").notNull(), // 'technical', 'aptitude', 'soft-skills'
+  category: text("category").default("technical"), // 'technical', 'aptitude', 'soft-skills'
   level: integer("level").default(0), // 0-100
   targetLevel: integer("target_level").default(100),
 });
