@@ -1,0 +1,73 @@
+You are working on a React + Vite project called "Placement Prep Tracker".
+
+CURRENT STATE:
+- All UI works correctly
+- Dashboard page is complete and should NOT be changed
+- Clicking Login currently redirects directly to Dashboard
+
+GOAL:
+Implement a proper Register → Login → Dashboard flow.
+
+STRICT RULES:
+- Do NOT modify Dashboard UI or logic
+- Do NOT auto-login users
+- Use localStorage only (no backend)
+- Keep changes minimal and clean
+
+TASKS:
+
+1. CREATE REGISTER PAGE
+   - Route: /register
+   - Inputs: Email, Password
+   - On submit:
+       - Save user into localStorage "users" array
+       - If email already exists → show error
+       - After successful registration → redirect to /login
+
+2. CREATE LOGIN PAGE
+   - Route: /login
+   - Inputs: Email, Password
+   - On submit:
+       - Validate against localStorage "users"
+       - If valid:
+           localStorage.setItem("currentUser", userObject)
+           redirect to /dashboard
+       - If invalid → show error
+
+3. FIX LOGIN BUTTON
+   - Wherever the Login button currently exists,
+     change it to navigate to "/login"
+   - Do NOT redirect to dashboard directly
+
+4. PROTECT DASHBOARD ROUTE
+   - Dashboard must ONLY be accessible if:
+       localStorage.getItem("currentUser") exists
+   - If not logged in:
+       redirect to /login
+
+5. ROUTING FLOW MUST BE:
+   - "/" → existing welcome/landing UI
+   - "/register" → Register page
+   - "/login" → Login page
+   - "/dashboard" → Protected dashboard (existing UI)
+
+6. LOGOUT (SIMPLE)
+   - Add a Logout button (can be text)
+   - On click:
+       localStorage.removeItem("currentUser")
+       redirect to /login
+
+OUTPUT REQUIRED:
+- Updated App routing
+- Login page code
+- Register page code
+- Auth guard logic
+- Clear list of files modified/added
+
+IMPORTANT:
+After this:
+- User MUST register first
+- Then login with same credentials
+- Then reach dashboard
+- Refreshing dashboard should stay logged in
+- Logging out should block dashboard access
