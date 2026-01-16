@@ -48,12 +48,6 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Email and password are required" });
       }
 
-      // Check if user exists first
-      const existing = await storage.getUserByEmail(email);
-      if (existing) {
-        return res.status(409).json({ message: "User already exists" });
-      }
-
       const user = await storage.createUser({
         email,
         password,
@@ -73,8 +67,8 @@ export async function registerRoutes(
         stack: err.stack
       });
       
-      // Handle SQLite/Postgres unique constraint
-      if (err.code === '23505' || err.message?.includes('UNIQUE constraint failed')) {
+      // SQLITE_CONSTRAINT unique or Postgres unique constraint
+      if (err.code === 'SQLITE_CONSTRAINT' || err.code === '23505' || err.message?.includes('UNIQUE constraint failed')) {
         return res.status(409).json({ message: "User already exists" });
       }
       res.status(500).json({ message: "Registration failed", error: err.message });
