@@ -1,4 +1,4 @@
-import { Upload, FileText, CheckCircle2, AlertCircle, Trash2, RefreshCcw } from "lucide-react";
+import { Upload, FileText, CheckCircle2, AlertCircle, Trash2, RefreshCcw, ExternalLink, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import { clsx } from "clsx";
 import { useToast } from "@/hooks/use-toast";
@@ -146,11 +146,31 @@ export default function Resume() {
                 <FileText className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 text-lg">{resume.fileName}</h3>
+                <a 
+                  href={resume.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-bold text-slate-900 text-lg hover:text-primary transition-colors flex items-center gap-2 group/link"
+                >
+                  {resume.fileName}
+                  <ExternalLink className="w-4 h-4 opacity-0 group-hover/link:opacity-100 transition-opacity" />
+                </a>
                 <p className="text-sm text-slate-500">Uploaded on {new Date(resume.uploadedAt).toLocaleDateString()}</p>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
+              <Button variant="outline" className="gap-2 h-11 px-6 rounded-xl border-slate-200 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200" asChild>
+                <a href={resume.url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-4 h-4" /> View
+                </a>
+              </Button>
+
+              <Button variant="outline" className="gap-2 h-11 px-6 rounded-xl border-slate-200 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200" asChild>
+                <a href={resume.url} download={resume.fileName}>
+                  <Download className="w-4 h-4" /> Download
+                </a>
+              </Button>
+
               <label className="cursor-pointer">
                 <input 
                   type="file" 

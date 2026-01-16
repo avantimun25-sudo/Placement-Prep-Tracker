@@ -349,12 +349,20 @@ export async function registerRoutes(
   });
 
   // Resumes
+  app.use("/resumes", express.static("resumes"));
+
   app.get("/api/resume", async (req, res) => {
     try {
       const userId = parseInt(req.query.userId as string);
       if (!userId) return res.status(400).json({ message: "User ID required" });
       const resume = await storage.getResume(userId);
-      res.json(resume || null);
+      if (resume) {
+        return res.json({
+          ...resume,
+          url: `/resumes/${path.basename(resume.filePath)}`
+        });
+      }
+      res.json(null);
     } catch (err) {
       res.status(500).json({ message: "Failed to fetch resume" });
     }
@@ -380,7 +388,10 @@ export async function registerRoutes(
         filePath: req.file.path,
       });
 
-      res.status(201).json(resume);
+      res.status(201).json({
+        ...resume,
+        url: `/resumes/${path.basename(resume.filePath)}`
+      });
     } catch (err) {
       console.error("Resume upload error:", err);
       res.status(500).json({ message: "Failed to upload resume" });
