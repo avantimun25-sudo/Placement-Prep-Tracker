@@ -1,11 +1,52 @@
-import { Link } from "wouter";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { GraduationCap } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Register() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    
+    if (users.find((u: any) => u.email === email)) {
+      toast({
+        title: "Error",
+        description: "Email already exists",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    users.push({ email, password });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    toast({
+      title: "Success",
+      description: "Registration successful! Please login.",
+    });
+    
+    setLocation("/login");
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
       <div className="flex items-center gap-2 mb-8">
@@ -22,24 +63,37 @@ export default function Register() {
             Create an account to start tracking your placement journey
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="m@example.com" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" />
-          </div>
-          <Button className="w-full h-11 bg-slate-900 hover:bg-slate-800">
-            Register
-          </Button>
-          <div className="text-center text-sm text-slate-600">
-            Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline font-medium">
-              Login
-            </Link>
-          </div>
+        <CardContent>
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="m@example.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input 
+                id="password" 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full h-11 bg-slate-900 hover:bg-slate-800">
+              Register
+            </Button>
+            <div className="text-center text-sm text-slate-600">
+              Already have an account?{" "}
+              <Link href="/login" className="text-primary hover:underline font-medium">
+                Login
+              </Link>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>
