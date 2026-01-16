@@ -94,7 +94,7 @@ export default function Dashboard() {
 
         {/* Skill Distribution Chart */}
         <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Skill Distribution</h3>
+          <h3 className="text-lg font-bold text-slate-800 mb-6">Progress Tracker</h3>
           {skills.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-center">
               <TrendingUp className="w-12 h-12 mb-2 opacity-20" />
