@@ -78,12 +78,19 @@ export async function registerRoutes(
   app.post("/api/login", async (req, res) => {
     try {
       const { email, password } = req.body;
+      console.log(`Login attempt for: ${email}`);
+      
       const user = await storage.getUserByEmail(email);
+      console.log(`DB query result for ${email}:`, user ? "User found" : "User NOT found");
+
       if (!user || user.password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      res.json(user);
+      
+      // Return only essential info, no password
+      res.json({ id: user.id, email: user.email });
     } catch (err) {
+      console.error("Login error:", err);
       res.status(500).json({ message: "Server error" });
     }
   });

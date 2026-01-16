@@ -34,7 +34,8 @@ export default function Login() {
 
       if (response.ok) {
         const user = await response.json();
-        localStorage.setItem("currentUser", JSON.stringify(user));
+        // Store only userId to remain device-independent (backend is source of truth)
+        localStorage.setItem("currentUser", JSON.stringify({ id: user.id }));
         toast({
           title: "Success",
           description: "Login successful!",
