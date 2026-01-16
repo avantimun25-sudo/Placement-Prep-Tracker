@@ -11,8 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User, Mail, Phone, BookOpen, GraduationCap, Calendar, X, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
+  const { toast } = useToast();
   const userData = JSON.parse(localStorage.getItem("currentUser") || "{}");
   const [isEditing, setIsEditing] = useState(false);
 
@@ -52,7 +54,27 @@ export default function Profile() {
               <Button onClick={() => setIsEditing(false)} variant="outline" className="h-9 gap-2 text-slate-500">
                 <X className="w-4 h-4" /> Cancel
               </Button>
-              <Button className="h-9 gap-2 bg-slate-900">
+              <Button 
+                onClick={() => {
+                  const updatedUser = { ...userData, ...formData };
+                  localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+                  
+                  // Also update the users array to persist changes across logins
+                  const users = JSON.parse(localStorage.getItem("users") || "[]");
+                  const userIdx = users.findIndex((u: any) => u.email === userData.email);
+                  if (userIdx !== -1) {
+                    users[userIdx] = { ...users[userIdx], ...formData };
+                    localStorage.setItem("users", JSON.stringify(users));
+                  }
+
+                  setIsEditing(false);
+                  toast({
+                    title: "Success",
+                    description: "Profile updated successfully!",
+                  });
+                }} 
+                className="h-9 gap-2 bg-slate-900"
+              >
                 <Check className="w-4 h-4" /> Save Changes
               </Button>
             </div>
