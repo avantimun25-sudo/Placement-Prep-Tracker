@@ -1,4 +1,4 @@
-import { users, userProfiles, resumes, skills, goals, companies, tips, type User, type InsertUser, type UserProfile, type InsertUserProfile, type Resume, type InsertResume, type Skill, type InsertSkill, type Goal, type InsertGoal, type Company, type InsertCompany, type Tip, type InsertTip } from "@shared/schema";
+import { users, userProfiles, resumes, skills, goals, companies, tips, companyNotes, type User, type InsertUser, type UserProfile, type InsertUserProfile, type Resume, type InsertResume, type Skill, type InsertSkill, type Goal, type InsertGoal, type Company, type InsertCompany, type Tip, type InsertTip, type CompanyNote, type InsertCompanyNote } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -32,6 +32,12 @@ export interface IStorage {
   getCompanies(userId: number): Promise<Company[]>;
   createCompany(company: InsertCompany & { userId: number }): Promise<Company>;
   updateCompany(id: number, userId: number, company: Partial<InsertCompany>): Promise<Company>;
+
+  // Company Notes
+  getCompanyNotes(userId: number, companyId?: number): Promise<CompanyNote[]>;
+  createCompanyNote(note: InsertCompanyNote & { userId: number }): Promise<CompanyNote>;
+  updateCompanyNote(id: number, userId: number, note: Partial<InsertCompanyNote>): Promise<CompanyNote>;
+  deleteCompanyNote(id: number, userId: number): Promise<void>;
 
   // Tips
   getTips(): Promise<Tip[]>;
@@ -144,6 +150,32 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db.update(companies).set(updates).where(and(eq(companies.id, id), eq(companies.userId, userId))).returning();
     if (!updated) throw new Error("Company not found");
     return updated;
+  }
+
+  async getCompanyNotes(userId: number, companyId?: number): Promise<CompanyNote[]> {
+    if (companyId) {
+      return await db.select().from(companyNotes).where(and(eq(companyNotes.userId, userId), eq(companyNotes.companyId, companyId)));
+    }
+    return await db.select().from(companyNotes).where(eq(companyNotes.userId, userId));
+  }
+
+  async createCompanyNote(insertNote: InsertCompanyNote & { userId: number }): Promise<CompanyNote> {
+    const [note] = await db.insert(companyNotes).values(insertNote).returning();
+    return note;
+  }
+
+  async updateCompanyNote(id: number, userId: number, updates: Partial<InsertCompanyNote>): Promise<CompanyNote> {
+    const [updated] = await db
+      .update(companyNotes)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(eq(companyNotes.id, id), eq(companyNotes.userId, userId)))
+      .returning();
+    if (!updated) throw new Error("Note not found");
+    return updated;
+  }
+
+  async deleteCompanyNote(id: number, userId: number): Promise<void> {
+    await db.delete(companyNotes).where(and(eq(companyNotes.id, id), eq(companyNotes.userId, userId)));
   }
 
   async getTips(): Promise<Tip[]> {

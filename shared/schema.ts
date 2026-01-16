@@ -45,6 +45,16 @@ export const goals = pgTable("goals", {
   date: timestamp("date").defaultNow(),
 });
 
+export const companyNotes = pgTable("company_notes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  companyId: integer("company_id").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const companies = pgTable("companies", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -65,6 +75,7 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({ id: true });
 export const insertSkillSchema = createInsertSchema(skills).omit({ id: true });
 export const insertGoalSchema = createInsertSchema(goals).omit({ id: true });
+export const insertCompanyNoteSchema = createInsertSchema(companyNotes).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCompanySchema = createInsertSchema(companies).omit({ id: true });
 export const insertTipSchema = createInsertSchema(tips).omit({ id: true });
 export const insertResumeSchema = createInsertSchema(resumes).omit({ id: true });
@@ -79,6 +90,8 @@ export type Skill = typeof skills.$inferSelect;
 export type InsertSkill = z.infer<typeof insertSkillSchema>;
 export type Goal = typeof goals.$inferSelect;
 export type InsertGoal = z.infer<typeof insertGoalSchema>;
+export type CompanyNote = typeof companyNotes.$inferSelect;
+export type InsertCompanyNote = z.infer<typeof insertCompanyNoteSchema>;
 export type Company = typeof companies.$inferSelect;
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type Tip = typeof tips.$inferSelect;

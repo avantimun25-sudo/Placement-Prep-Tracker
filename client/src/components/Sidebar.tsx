@@ -10,7 +10,8 @@ import {
   Lightbulb,
   GraduationCap,
   LogOut,
-  User as UserIcon
+  User as UserIcon,
+  NotebookPen
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/skills", label: "Skills", icon: Trophy },
   { href: "/goals", label: "Goals", icon: CheckSquare },
   { href: "/companies", label: "Companies", icon: Briefcase },
+  { href: "/company-notes", label: "Company-wise Notes", icon: NotebookPen },
   { href: "/progress", label: "Progress", icon: Target },
   { href: "/resume", label: "Resume", icon: FileText },
   { href: "/tips", label: "Tips", icon: Lightbulb },

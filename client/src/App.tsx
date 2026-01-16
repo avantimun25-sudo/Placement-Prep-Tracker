@@ -17,6 +17,7 @@ import Resume from "@/pages/Resume";
 import Tips from "@/pages/Tips";
 import Progress from "@/pages/Progress";
 import Profile from "@/pages/Profile";
+import CompanyNotes from "@/pages/CompanyNotes";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 
@@ -50,6 +51,9 @@ function Router() {
         </Route>
         <Route path="/companies">
           <ProtectedRoute component={Companies} path="/companies" />
+        </Route>
+        <Route path="/company-notes">
+          <ProtectedRoute component={CompanyNotes} path="/company-notes" />
         </Route>
         <Route path="/goals">
           <ProtectedRoute component={Goals} path="/goals" />

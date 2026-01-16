@@ -1,0 +1,88 @@
+Add a new sidebar section named "Company-wise Notes".
+
+GOAL:
+- Allow users to write and manage notes specific to each company.
+- Notes must be linked to both user and company.
+- Clean integration with existing Companies feature.
+
+MANDATORY CHANGES:
+
+--------------------------------
+SIDEBAR UI
+--------------------------------
+1. Add a new navigation item in sidebar:
+   - Label: Company-wise Notes
+   - Icon: 📝 (or notebook icon)
+   - Position: Below "Companies" and above "Progress"
+
+2. Sidebar item must:
+   - Highlight when active
+   - Navigate to /company-notes
+
+--------------------------------
+PAGE CREATION
+--------------------------------
+Create a new page:
+- Route: /company-notes
+- Title: Company-wise Notes
+- Subtitle: "Store interview prep, HR notes, and follow-ups"
+
+--------------------------------
+DATABASE DESIGN
+--------------------------------
+Create new table:
+
+company_notes:
+- id
+- user_id
+- company_id
+- title
+- content
+- created_at
+- updated_at
+
+--------------------------------
+PAGE FUNCTIONALITY
+--------------------------------
+1. Dropdown to select company (from user's companies)
+2. Rich text / textarea to write notes
+3. Save, Edit, Delete note options
+4. Notes must be:
+   - User-specific
+   - Company-specific
+
+--------------------------------
+BACKEND APIs
+--------------------------------
+POST   /api/company-notes
+GET    /api/company-notes?companyId=
+PUT    /api/company-notes/:id
+DELETE /api/company-notes/:id
+
+All APIs must validate:
+- userId
+- company ownership
+
+--------------------------------
+FRONTEND BEHAVIOR
+--------------------------------
+- Fetch only companies belonging to logged-in user
+- Fetch notes only for selected company
+- Show empty state if no notes exist
+- Persist notes across sessions
+
+--------------------------------
+STRICT RULES
+--------------------------------
+- Do NOT share notes across users
+- Do NOT allow notes without company selection
+- Do NOT use demo data
+- Follow existing design language
+
+EXPECTED RESULT:
+--------------------------------
+- Sidebar shows "Company-wise Notes"
+- Clicking opens notes page
+- Notes are saved per company
+- Each user sees only their notes
+- Clean, professional UX

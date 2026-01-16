@@ -277,6 +277,66 @@ export async function registerRoutes(
     }
   });
 
+  // Company Notes
+  app.get("/api/company-notes", async (req, res) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      const companyId = req.query.companyId ? parseInt(req.query.companyId as string) : undefined;
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+      
+      const result = await storage.getCompanyNotes(userId, companyId);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  });
+
+  app.post("/api/company-notes", async (req, res) => {
+    try {
+      const { userId, companyId, title, content } = req.body;
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+      if (!companyId || !title || !content) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const result = await storage.createCompanyNote({
+        userId: parseInt(userId.toString()),
+        companyId: parseInt(companyId.toString()),
+        title,
+        content
+      });
+      res.status(201).json(result);
+    } catch (err) {
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  });
+
+  app.put("/api/company-notes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { userId, title, content } = req.body;
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+      const result = await storage.updateCompanyNote(id, userId, { title, content });
+      res.json(result);
+    } catch (err) {
+      res.status(404).json({ message: "Note not found or unauthorized" });
+    }
+  });
+
+  app.delete("/api/company-notes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = parseInt(req.query.userId as string);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+      await storage.deleteCompanyNote(id, userId);
+      res.status(204).send();
+    } catch (err) {
+      res.status(404).json({ message: "Note not found or unauthorized" });
+    }
+  });
+
   // Tips
   app.get(api.tips.list.path, async (_req, res) => {
     const result = await storage.getTips();
