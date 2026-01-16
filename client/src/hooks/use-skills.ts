@@ -27,13 +27,20 @@ export function useCreateSkill() {
 
   return useMutation({
     mutationFn: async (data: InsertSkill) => {
+      if (!userId) throw new Error("User not authenticated");
       const res = await fetch(api.skills.create.path, {
         method: api.skills.create.method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, userId }),
+        body: JSON.stringify({ 
+          userId, 
+          skill_name: data.skillName, 
+          level: data.level,
+          category: data.category,
+          targetLevel: data.targetLevel
+        }),
       });
       if (!res.ok) throw new Error("Failed to create skill");
-      return api.skills.create.responses[201].parse(await res.json());
+      return await res.json();
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [api.skills.list.path, userId] }),
   });

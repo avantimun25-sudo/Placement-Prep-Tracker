@@ -104,15 +104,20 @@ export async function registerRoutes(
 
   app.post(api.skills.create.path, async (req, res) => {
     try {
-      const { userId, ...data } = req.body;
-      if (!userId) return res.status(400).json({ message: "User ID required" });
-      const input = api.skills.create.input.parse(data);
-      const result = await storage.createSkill({ ...input, userId });
+      const { userId, skill_name, level, category, targetLevel } = req.body;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      
+      const result = await storage.createSkill({ 
+        skillName: skill_name, 
+        level: level, 
+        userId,
+        category: category || "technical",
+        targetLevel: targetLevel || 100
+      });
       res.status(201).json(result);
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        res.status(400).json({ message: err.errors[0].message });
-      }
+      console.error("Skill creation error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   });
 

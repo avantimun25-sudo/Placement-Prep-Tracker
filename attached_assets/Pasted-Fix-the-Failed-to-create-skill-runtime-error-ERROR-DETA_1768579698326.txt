@@ -1,0 +1,87 @@
+Fix the "Failed to create skill" runtime error.
+
+ERROR DETAILS:
+- Error thrown in client/src/hooks/use-skills.ts at line 35
+- Backend returns non-OK response when creating skill
+- userId is included but request still fails
+
+MANDATORY FIXES:
+
+1. FRONTEND (use-skills.ts)
+   - Read userId ONLY from localStorage.currentUser
+   - Ensure userId exists before making request
+   - Send correct payload keys expected by backend
+
+REPLACE skill creation fetch with:
+
+const currentUser = JSON.parse(
+  localStorage.getItem("currentUser") || "{}"
+);
+
+const userId = currentUser.userId;
+
+if (!userId) {
+  throw new Error("User not authenticated");
+}
+
+fetch("/api/skills", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    userId: userId,
+    skill_name: data.name,
+    level: data.level
+  })
+});
+
+2. BACKEND (POST /api/skills)
+   - Accept userId, skill_name, and level from req.body
+   - Reject request if userId is missing
+   - Insert skill using user_id column ONLY
+
+Backend route must be:
+
+app.post("/api/skills", (req, res) => {
+  const { userId, skill_name, level } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  db.run(
+    "INSERT INTO skills (user_id, skill_name, level) VALUES (?, ?, ?)",
+    [userId, skill_name, level],
+    function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json(err);
+      }
+
+      res.status(201).json({
+        id: this.lastID,
+        skill_name,
+        level
+      });
+    }
+  );
+});
+
+3. DATABASE CHECK
+   - Ensure skills table has:
+     user_id INTEGER NOT NULL
+     skill_name TEXT
+     level INTEGER
+
+STRICT RULES:
+- Do NOT use demo data
+- Do NOT use fallback values
+- Do NOT store skills in localStorage
+- Skill creation must be user-scoped
+
+EXPECTED RESULT:
+- Clicking "Add Skill" works
+- No runtime error
+- Skill saved only for logged-in user
+- Other users do not see this skill

@@ -10,7 +10,7 @@ export default function Skills() {
   const updateSkill = useUpdateSkill();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newSkill, setNewSkill] = useState({ name: "", category: "technical", proficiency: 50, targetLevel: 100 });
+  const [newSkill, setNewSkill] = useState({ skillName: "", category: "technical", level: 50, targetLevel: 100 });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<string>("");
 
@@ -20,20 +20,20 @@ export default function Skills() {
     e.preventDefault();
     await createSkill.mutateAsync(newSkill);
     setIsModalOpen(false);
-    setNewSkill({ name: "", category: "technical", proficiency: 50, targetLevel: 100 });
+    setNewSkill({ skillName: "", category: "technical", level: 50, targetLevel: 100 });
   };
 
-  const startEditing = (id: number, currentProficiency: number) => {
+  const startEditing = (id: number, currentLevel: number) => {
     setEditingId(id);
-    setEditValue(currentProficiency.toString());
+    setEditValue(currentLevel.toString());
   };
 
   const handleSave = async (id: number) => {
-    const proficiency = parseInt(editValue);
-    if (isNaN(proficiency) || proficiency < 0 || proficiency > 100) {
+    const level = parseInt(editValue);
+    if (isNaN(level) || level < 0 || level > 100) {
       return;
     }
-    await updateSkill.mutateAsync({ id, proficiency });
+    await updateSkill.mutateAsync({ id, level });
     setEditingId(null);
   };
 
@@ -74,7 +74,7 @@ export default function Skills() {
                 {categorySkills.map(skill => (
                   <div key={skill.id} className="group p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-primary/20 transition-colors">
                     <div className="flex justify-between items-start mb-3">
-                      <h4 className="font-bold text-slate-700">{skill.name}</h4>
+                      <h4 className="font-bold text-slate-700">{skill.skillName}</h4>
                       <div className="flex gap-2">
                         {editingId === skill.id ? (
                           <>
@@ -96,7 +96,7 @@ export default function Skills() {
                         ) : (
                           <>
                             <button 
-                              onClick={() => startEditing(skill.id, skill.proficiency || 0)}
+                              onClick={() => startEditing(skill.id, skill.level || 0)}
                               className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                               title="Edit"
                             >
@@ -128,7 +128,7 @@ export default function Skills() {
                               autoFocus
                             />
                           ) : (
-                            <span className="text-slate-700 font-bold">{skill.proficiency}%</span>
+                            <span className="text-slate-700 font-bold">{skill.level}%</span>
                           )}
                         </div>
                         <span>Target: {skill.targetLevel}%</span>
@@ -136,7 +136,7 @@ export default function Skills() {
                       <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden relative">
                         <motion.div 
                           initial={{ width: 0 }}
-                          animate={{ width: `${skill.proficiency}%` }}
+                          animate={{ width: `${skill.level}%` }}
                           transition={{ duration: 1, ease: "easeOut" }}
                           className={`h-full rounded-full ${
                             category === 'technical' ? 'bg-indigo-500' : 
@@ -178,8 +178,8 @@ export default function Skills() {
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Skill Name</label>
                   <input 
                     required
-                    value={newSkill.name}
-                    onChange={(e) => setNewSkill({...newSkill, name: e.target.value})}
+                    value={newSkill.skillName}
+                    onChange={(e) => setNewSkill({...newSkill, skillName: e.target.value})}
                     placeholder="e.g. React, Python, Communication"
                     className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
@@ -202,8 +202,8 @@ export default function Skills() {
                     <input 
                       type="number"
                       min="0" max="100"
-                      value={newSkill.proficiency}
-                      onChange={(e) => setNewSkill({...newSkill, proficiency: parseInt(e.target.value)})}
+                      value={newSkill.level}
+                      onChange={(e) => setNewSkill({...newSkill, level: parseInt(e.target.value)})}
                       className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     />
                   </div>
