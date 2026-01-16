@@ -4,9 +4,19 @@ import { motion } from "framer-motion";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Decorative background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <motion.div 
+        animate={{ 
+          backgroundPosition: ["0% 0%", "100% 100%"],
+        }}
+        transition={{ 
+          duration: 40, 
+          repeat: Infinity, 
+          ease: "linear" 
+        }}
+        className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" 
+      />
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-accent/5 rounded-full blur-3xl" />
 
@@ -31,27 +41,34 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-sm font-medium mb-6">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              Placement Season 2025 is here
+              Placement Season 2026 is here
             </div>
-            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6">
+            <motion.h1 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6"
+            >
               Master Your <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent font-extrabold">
                 Placement Journey
               </span>
-            </h1>
-            <p className="text-lg text-slate-600 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+              className="text-lg text-slate-600 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+            >
               Track your skills, manage job applications, and achieve your daily goals. 
               The ultimate companion for students aiming for their dream job.
-            </p>
+            </motion.p>
             
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-              <Link href="/login" className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-xl shadow-slate-900/20">
+              <Link href="/login" className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-xl shadow-slate-900/20 hover:shadow-primary/20">
                 Start Preparing
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <button className="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-all">
-                View Demo
-              </button>
             </div>
 
             <div className="mt-12 flex items-center gap-8 justify-center lg:justify-start text-slate-500">
@@ -72,12 +89,20 @@ export default function Home() {
 
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1,
+              y: [0, -10, 0]
+            }}
+            transition={{ 
+              opacity: { duration: 0.8, delay: 0.2 },
+              scale: { duration: 0.8, delay: 0.2 },
+              y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+            }}
             className="relative hidden lg:block"
           >
             {/* Abstract UI representation */}
-            <div className="relative z-10 bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 rotate-2 hover:rotate-0 transition-all duration-500">
+            <div className="relative z-10 bg-white rounded-3xl shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 p-6 rotate-2 hover:rotate-0 transition-all duration-700 ease-in-out">
                {/* Decorative UI Mockup */}
                <div className="flex gap-4 mb-6">
                  <div className="w-1/2 p-4 rounded-2xl bg-primary/5 border border-primary/10">
