@@ -1,0 +1,65 @@
+You are modifying an existing JSP-based hackathon project
+called "Placement Preparation Tracker".
+
+CURRENT STATE:
+- dashboard.jsp loads directly
+- All features already exist (skills, progress, companies, goals, etc.)
+- No authentication is enforced
+
+GOAL:
+Add a proper Login + Register flow and enforce authentication,
+WITHOUT changing or removing any existing functionality or UI.
+
+STRICT RULES:
+- Do NOT auto-login users
+- Do NOT redirect directly to dashboard.jsp
+- Do NOT delete or rewrite existing pages
+- Only ADD new files and SMALL guards where required
+
+TASKS (DO ALL OF THEM):
+
+1. Create login.jsp
+   - Email input
+   - Password input
+   - Login button
+   - Link to register.jsp
+   - Form must POST to LoginServlet
+
+2. Create register.jsp
+   - Name, Email, Password
+   - Register button
+   - Form must POST to RegisterServlet
+
+3. Modify index.jsp
+   - It must be the ONLY entry point
+   - Show app title and description
+   - "Login" button → login.jsp
+   - "Register" button → register.jsp
+   - REMOVE any automatic redirect to dashboard.jsp
+
+4. Add session protection to dashboard.jsp
+   - At the TOP of the file (before HTML):
+     If session userId is NULL → redirect to login.jsp
+     Else → allow access
+
+5. Ensure this behavior:
+   - Opening the project shows index.jsp
+   - Clicking Login goes to login.jsp
+   - Directly opening dashboard.jsp redirects to login.jsp
+   - Only after successful login can dashboard.jsp be accessed
+
+6. DO NOT add database logic yet
+   - Authentication can be mock (hardcoded user) for now
+   - Focus ONLY on correct routing and session flow
+
+7. Provide:
+   - Full code for login.jsp
+   - Full code for register.jsp
+   - Modified index.jsp
+   - The exact session-check snippet added to dashboard.jsp
+   - Servlet stubs for LoginServlet and RegisterServlet
+     (no DB logic, just session handling)
+
+IMPORTANT:
+This is for a hackathon demo.
+Clarity and correctness matter more than complexity.
