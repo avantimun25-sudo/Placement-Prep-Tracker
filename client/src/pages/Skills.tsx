@@ -1,0 +1,198 @@
+import { useSkills, useCreateSkill, useDeleteSkill, useUpdateSkill } from "@/hooks/use-skills";
+import { useState } from "react";
+import { Plus, Trash2, Edit2, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function Skills() {
+  const { data: skills = [], isLoading } = useSkills();
+  const createSkill = useCreateSkill();
+  const deleteSkill = useDeleteSkill();
+  const updateSkill = useUpdateSkill();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newSkill, setNewSkill] = useState({ name: "", category: "technical", proficiency: 50, targetLevel: 100 });
+
+  const categories = ["technical", "aptitude", "soft-skills"];
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await createSkill.mutateAsync(newSkill);
+    setIsModalOpen(false);
+    setNewSkill({ name: "", category: "technical", proficiency: 50, targetLevel: 100 });
+  };
+
+  if (isLoading) return <div className="p-8 text-center text-slate-500">Loading skills...</div>;
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-slate-900">Skills Tracker</h2>
+          <p className="text-slate-500 mt-1">Monitor your proficiency across different domains.</p>
+        </div>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-primary/25 flex items-center gap-2 transition-all active:scale-95"
+        >
+          <Plus className="w-5 h-5" />
+          Add Skill
+        </button>
+      </div>
+
+      <div className="grid gap-8">
+        {categories.map(category => {
+          const categorySkills = skills.filter(s => s.category === category);
+          if (categorySkills.length === 0) return null;
+
+          return (
+            <div key={category} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-800 capitalize mb-6 flex items-center gap-3">
+                <span className={`w-3 h-8 rounded-full ${
+                  category === 'technical' ? 'bg-indigo-500' : 
+                  category === 'aptitude' ? 'bg-blue-500' : 'bg-teal-500'
+                }`} />
+                {category.replace('-', ' ')}
+              </h3>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                {categorySkills.map(skill => (
+                  <div key={skill.id} className="group p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-primary/20 transition-colors">
+                    <div className="flex justify-between items-start mb-3">
+                      <h4 className="font-bold text-slate-700">{skill.name}</h4>
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => deleteSkill.mutate(skill.id)}
+                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="relative pt-2">
+                      <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
+                        <span>Current: {skill.proficiency}%</span>
+                        <span>Target: {skill.targetLevel}%</span>
+                      </div>
+                      <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${skill.proficiency}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className={`h-full rounded-full ${
+                            category === 'technical' ? 'bg-indigo-500' : 
+                            category === 'aptitude' ? 'bg-blue-500' : 'bg-teal-500'
+                          }`}
+                        />
+                      </div>
+                      
+                      {/* Simple Proficiency Slider Update */}
+                      <input 
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={skill.proficiency || 0}
+                        onChange={(e) => updateSkill.mutate({ id: skill.id, proficiency: parseInt(e.target.value) })}
+                        className="absolute inset-0 w-full opacity-0 cursor-pointer"
+                        title="Drag to update proficiency"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        {skills.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
+            <p className="text-slate-400">No skills added yet. Start tracking your progress!</p>
+          </div>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-slate-800">Add New Skill</h3>
+                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreate} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Skill Name</label>
+                  <input 
+                    required
+                    value={newSkill.name}
+                    onChange={(e) => setNewSkill({...newSkill, name: e.target.value})}
+                    placeholder="e.g. React, Python, Communication"
+                    className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Category</label>
+                  <select 
+                    value={newSkill.category}
+                    onChange={(e) => setNewSkill({...newSkill, category: e.target.value})}
+                    className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  >
+                    {categories.map(c => (
+                      <option key={c} value={c} className="capitalize">{c.replace('-', ' ')}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Current %</label>
+                    <input 
+                      type="number"
+                      min="0" max="100"
+                      value={newSkill.proficiency}
+                      onChange={(e) => setNewSkill({...newSkill, proficiency: parseInt(e.target.value)})}
+                      className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Target %</label>
+                    <input 
+                      type="number"
+                      min="0" max="100"
+                      value={newSkill.targetLevel}
+                      onChange={(e) => setNewSkill({...newSkill, targetLevel: parseInt(e.target.value)})}
+                      className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 flex gap-3">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 px-4 py-2 rounded-xl font-semibold text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-200"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={createSkill.isPending}
+                    className="flex-1 px-4 py-2 rounded-xl font-semibold bg-primary text-white hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/25"
+                  >
+                    {createSkill.isPending ? "Adding..." : "Add Skill"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
