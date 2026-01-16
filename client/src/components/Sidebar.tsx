@@ -62,18 +62,21 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto space-y-4">
-        <div className="px-4 py-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <button 
+          onClick={() => setLocation("/profile")}
+          className="w-full text-left px-4 py-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-slate-100 transition-all duration-200 cursor-pointer group"
+        >
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Profile</p>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white text-xs font-bold shadow-md">
               JS
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-800">John Student</p>
+              <p className="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors">John Student</p>
               <p className="text-xs text-slate-500">CS Final Year</p>
             </div>
           </div>
-        </div>
+        </button>
 
         <button 
           onClick={handleLogout}
