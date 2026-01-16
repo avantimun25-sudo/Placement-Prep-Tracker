@@ -24,6 +24,13 @@ const navItems = [
 
 export function Sidebar() {
   const [location, setLocation] = useLocation();
+  const userData = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  
+  const initials = (userData.name || "John Student")
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase();
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
@@ -69,11 +76,11 @@ export function Sidebar() {
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Profile</p>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white text-xs font-bold shadow-md">
-              JS
+              {initials}
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors">John Student</p>
-              <p className="text-xs text-slate-500">CS Final Year</p>
+              <p className="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors line-clamp-1">{userData.name || "John Student"}</p>
+              <p className="text-xs text-slate-500 line-clamp-1">{userData.status || "Final Year"}</p>
             </div>
           </div>
         </button>
