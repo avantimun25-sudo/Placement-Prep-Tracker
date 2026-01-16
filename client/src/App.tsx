@@ -14,7 +14,6 @@ import Skills from "@/pages/Skills";
 import Companies from "@/pages/Companies";
 import Goals from "@/pages/Goals";
 import Resume from "@/pages/Resume";
-import Tips from "@/pages/Tips";
 import Progress from "@/pages/Progress";
 import Profile from "@/pages/Profile";
 import CompanyNotes from "@/pages/CompanyNotes";
@@ -62,7 +61,11 @@ function Router() {
           <ProtectedRoute component={Resume} path="/resume" />
         </Route>
         <Route path="/tips">
-          <ProtectedRoute component={Tips} path="/tips" />
+          <Route component={() => {
+            const [, setLocation] = useLocation();
+            useEffect(() => setLocation("/dashboard"), []);
+            return null;
+          }} />
         </Route>
         <Route path="/progress">
           <ProtectedRoute component={Progress} path="/progress" />

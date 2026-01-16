@@ -7,7 +7,6 @@ import {
   Trophy, 
   CheckSquare, 
   FileText, 
-  Lightbulb,
   GraduationCap,
   LogOut,
   User as UserIcon,
@@ -24,7 +23,6 @@ const navItems = [
   { href: "/company-notes", label: "Company-wise Notes", icon: NotebookPen },
   { href: "/progress", label: "Progress", icon: Target },
   { href: "/resume", label: "Resume", icon: FileText },
-  { href: "/tips", label: "Tips", icon: Lightbulb },
 ];
 
 export function Sidebar() {
