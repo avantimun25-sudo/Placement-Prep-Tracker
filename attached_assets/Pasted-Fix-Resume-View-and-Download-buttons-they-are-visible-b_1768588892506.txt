@@ -1,0 +1,88 @@
+Fix Resume View and Download buttons — they are visible but not clickable.
+
+-------------------------------------------------
+ROOT CAUSE
+-------------------------------------------------
+- Buttons exist visually but have no functional click handlers
+OR
+- Buttons are inside a disabled / overlay container
+OR
+- Resume file URL is not correctly bound to buttons
+
+-------------------------------------------------
+REQUIRED FUNCTIONALITY
+-------------------------------------------------
+
+When user clicks:
+
+1. VIEW
+   - Resume must open in a new browser tab
+
+2. DOWNLOAD
+   - Resume must download immediately
+
+-------------------------------------------------
+FRONTEND CHANGES
+-------------------------------------------------
+
+1. Ensure buttons are real <button> or <a> elements
+   (not divs)
+
+2. Attach onClick handlers explicitly:
+
+VIEW BUTTON:
+onClick → window.open(resume.fileUrl, "_blank")
+
+DOWNLOAD BUTTON:
+onClick → create temporary <a> element
+            set href = resume.fileUrl
+            set download = resume.filename
+            trigger click()
+
+3. Ensure pointer events are enabled:
+   - Remove any `pointer-events: none`
+   - Remove any absolute overlay blocking clicks
+
+4. Cursor must be:
+   cursor: pointer
+
+-------------------------------------------------
+BACKEND REQUIREMENTS
+-------------------------------------------------
+
+Resume API must return:
+{
+  id,
+  filename,
+  fileUrl
+}
+
+fileUrl must be:
+✔ Publicly accessible
+✔ Correct MIME type
+✔ Belongs to logged-in user only
+
+-------------------------------------------------
+SECURITY CHECK
+-------------------------------------------------
+
+- Validate userId before serving resume
+- Do NOT allow cross-user resume access
+
+-------------------------------------------------
+DO NOT ADD
+-------------------------------------------------
+
+❌ Resume analysis
+❌ Resume scoring
+❌ Auto evaluation
+
+-------------------------------------------------
+FINAL RESULT
+-------------------------------------------------
+
+✔ View opens resume in new tab
+✔ Download saves resume locally
+✔ Replace uploads new resume
+✔ Delete removes resume
+✔ Buttons actually work

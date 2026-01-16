@@ -159,16 +159,27 @@ export default function Resume() {
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button variant="outline" className="gap-2 h-11 px-6 rounded-xl border-slate-200 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200" asChild>
-                <a href={resume.url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-4 h-4" /> View
-                </a>
+              <Button 
+                variant="outline" 
+                className="gap-2 h-11 px-6 rounded-xl border-slate-200 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200 cursor-pointer"
+                onClick={() => window.open(resume.url, "_blank")}
+              >
+                <ExternalLink className="w-4 h-4" /> View
               </Button>
 
-              <Button variant="outline" className="gap-2 h-11 px-6 rounded-xl border-slate-200 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200" asChild>
-                <a href={resume.url} download={resume.fileName}>
-                  <Download className="w-4 h-4" /> Download
-                </a>
+              <Button 
+                variant="outline" 
+                className="gap-2 h-11 px-6 rounded-xl border-slate-200 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200 cursor-pointer"
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = resume.url;
+                  link.download = resume.fileName;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+              >
+                <Download className="w-4 h-4" /> Download
               </Button>
 
               <label className="cursor-pointer">
