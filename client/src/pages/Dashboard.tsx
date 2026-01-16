@@ -40,7 +40,7 @@ export default function Dashboard() {
           value={skills.length > 0 ? `${avgProficiency}%` : "0%"} 
           icon={TrendingUp} 
           color="primary"
-          trend={skills.length > 0 ? "+2% this week" : undefined}
+          trend={undefined}
         />
         <StatCard 
           label="Active Applications" 
