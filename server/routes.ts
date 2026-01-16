@@ -140,17 +140,21 @@ export async function registerRoutes(
   });
 
   app.post("/api/skills", async (req, res) => {
-    const { userId, skill_name, skillName, level, category } = req.body;
-    const finalSkillName = skillName || skill_name;
+    const { userId, skillName, level, category } = req.body;
+    
+    if (!userId || !skillName || level === undefined || !category) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
 
-    if (!userId || !finalSkillName || level === undefined || !category) {
-      return res.status(400).json({ error: "Missing fields" });
+    const validCategories = ["technical", "aptitude", "soft"];
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({ error: "Invalid category. Must be one of: technical, aptitude, soft" });
     }
 
     try {
       const result = await storage.createSkill({
         userId: parseInt(userId.toString()),
-        skillName: finalSkillName,
+        skillName,
         level: parseInt(level.toString()),
         category,
         targetLevel: 100

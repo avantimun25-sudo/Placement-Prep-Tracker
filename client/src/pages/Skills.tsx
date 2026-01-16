@@ -22,23 +22,39 @@ export default function Skills() {
     const categories = ["technical", "aptitude", "soft"];
 
   const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
     const userId = currentUser.id;
+
+    if (!newSkill.skillName.trim()) {
+      alert("Please enter a skill name");
+      return;
+    }
 
     if (!newSkill.category) {
       alert("Please select a category");
       return;
     }
 
-    await createSkill.mutateAsync({
-      ...newSkill,
-      userId,
-      skillName: newSkill.skillName,
-      level: Number(newSkill.level),
-      category: newSkill.category
-    });
-    setIsModalOpen(false);
-    setNewSkill({ skillName: "", category: "", level: 50, targetLevel: 100 });
+    if (newSkill.level === undefined || newSkill.level < 0 || newSkill.level > 100) {
+      alert("Please enter a valid level (0-100)");
+      return;
+    }
+
+    try {
+      await createSkill.mutateAsync({
+        userId,
+        skillName: newSkill.skillName.trim(),
+        level: Number(newSkill.level),
+        category: newSkill.category,
+        targetLevel: Number(newSkill.targetLevel)
+      });
+      setIsModalOpen(false);
+      setNewSkill({ skillName: "", category: "", level: 50, targetLevel: 100 });
+    } catch (error) {
+      console.error("Failed to create skill:", error);
+      alert("Failed to add skill. Please try again.");
+    }
   };
 
   const startEditing = (id: number, currentLevel: number) => {
