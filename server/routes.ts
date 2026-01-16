@@ -140,17 +140,18 @@ export async function registerRoutes(
   });
 
   app.post("/api/skills", async (req, res) => {
-    const { userId, skill_name, level, category } = req.body;
+    const { userId, skill_name, skillName, level, category } = req.body;
+    const finalSkillName = skillName || skill_name;
 
-    if (!userId || !category) {
-      return res.status(400).json({ error: "Missing data" });
+    if (!userId || !finalSkillName || level === undefined || !category) {
+      return res.status(400).json({ error: "Missing fields" });
     }
 
     try {
       const result = await storage.createSkill({
         userId: parseInt(userId.toString()),
-        skillName: skill_name,
-        level: level || 0,
+        skillName: finalSkillName,
+        level: parseInt(level.toString()),
         category,
         targetLevel: 100
       });
@@ -158,7 +159,7 @@ export async function registerRoutes(
       res.status(201).json(result);
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Internal Server Error" });
+      res.status(500).json({ error: "DB insert failed" });
     }
   });
 

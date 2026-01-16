@@ -10,17 +10,35 @@ export default function Skills() {
   const updateSkill = useUpdateSkill();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newSkill, setNewSkill] = useState({ skillName: "", category: "technical", level: 50, targetLevel: 100 });
+    const [newSkill, setNewSkill] = useState<{
+      skillName: string;
+      category: string;
+      level: number;
+      targetLevel: number;
+    }>({ skillName: "", category: "", level: 50, targetLevel: 100 });
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editValue, setEditValue] = useState<string>("");
 
     const categories = ["technical", "aptitude", "soft"];
 
   const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await createSkill.mutateAsync(newSkill);
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+    const userId = currentUser.id;
+
+    if (!newSkill.category) {
+      alert("Please select a category");
+      return;
+    }
+
+    await createSkill.mutateAsync({
+      ...newSkill,
+      userId,
+      skillName: newSkill.skillName,
+      level: Number(newSkill.level),
+      category: newSkill.category
+    });
     setIsModalOpen(false);
-    setNewSkill({ skillName: "", category: "technical", level: 50, targetLevel: 100 });
+    setNewSkill({ skillName: "", category: "", level: 50, targetLevel: 100 });
   };
 
   const startEditing = (id: number, currentLevel: number) => {
@@ -187,12 +205,14 @@ export default function Skills() {
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Category</label>
                   <select 
+                    required
                     value={newSkill.category}
                     onChange={(e) => setNewSkill({...newSkill, category: e.target.value})}
                     className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   >
+                    <option value="" disabled>Select category</option>
                     {categories.map(c => (
-                      <option key={c} value={c} className="capitalize">{c.replace('-', ' ')}</option>
+                      <option key={c} value={c} className="capitalize">{c === 'soft' ? 'Soft Skills' : c}</option>
                     ))}
                   </select>
                 </div>

@@ -1,0 +1,101 @@
+Fix skill creation error when adding Technical, Aptitude, and Soft skills.
+
+CURRENT ERROR:
+"Failed to create skill"
+Occurs for ALL categories.
+
+ROOT CAUSE:
+Backend does not properly accept or store `category`.
+
+--------------------------------
+STEP 1: DATABASE FIX (MANDATORY)
+--------------------------------
+Ensure skills table schema is EXACTLY:
+
+CREATE TABLE IF NOT EXISTS skills (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL,
+  skill_name TEXT NOT NULL,
+  level INTEGER NOT NULL,
+  category TEXT NOT NULL CHECK (
+    category IN ('technical', 'aptitude', 'soft')
+  )
+);
+
+--------------------------------
+STEP 2: BACKEND API FIX
+--------------------------------
+Update POST /api/skills handler to:
+
+app.post("/api/skills", (req, res) => {
+  const { userId, skill_name, level, category } = req.body;
+
+  if (!userId || !skill_name || level === undefined || !category) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
+
+  db.run(
+    `
+    INSERT INTO skills (user_id, skill_name, level, category)
+    VALUES (?, ?, ?, ?)
+    `,
+    [userId, skill_name, level, category],
+    function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "DB insert failed" });
+      }
+
+      res.status(201).json({
+        id: this.lastID,
+        user_id: userId,
+        skill_name,
+        level,
+        category
+      });
+    }
+  );
+});
+
+--------------------------------
+STEP 3: FRONTEND FIX (CRITICAL)
+--------------------------------
+In Add Skill modal:
+
+- Category dropdown MUST send lowercase values:
+  technical | aptitude | soft
+
+Payload MUST be:
+
+JSON.stringify({
+  skill_name: form.skill_name,
+  level: Number(form.level),
+  category: form.category,
+  userId: currentUser.id
+});
+
+--------------------------------
+STEP 4: DO NOT DEFAULT CATEGORY
+--------------------------------
+❌ Remove any default:
+category = "technical"
+
+Category MUST come ONLY from user selection.
+
+--------------------------------
+STEP 5: DISPLAY FIX
+--------------------------------
+Filter skills strictly:
+
+technicalSkills = skills.filter(s => s.category === "technical");
+aptitudeSkills  = skills.filter(s => s.category === "aptitude");
+softSkills      = skills.filter(s => s.category === "soft");
+
+--------------------------------
+EXPECTED RESULT
+--------------------------------
+✔ Skill creation succeeds
+✔ No runtime error
+✔ Skills appear under correct section
+✔ DB stores category correctly
+✔ No skill leaks into Technical
