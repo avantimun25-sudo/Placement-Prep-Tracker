@@ -41,12 +41,16 @@ export function useCreateSkill() {
         },
         body: JSON.stringify({
           userId: userId,
-          skill_name: data.name || data.skillName,
-          level: data.level
+          skillName: data.skillName,
+          level: data.level,
+          category: data.category
         })
       });
 
-      if (!res.ok) throw new Error("Failed to create skill");
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to create skill");
+      }
       return await res.json();
     },
     onSuccess: () => {

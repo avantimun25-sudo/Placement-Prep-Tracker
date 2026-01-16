@@ -92,8 +92,7 @@ export default function Skills() {
       <div className="grid gap-8">
         {categories.map(category => {
           const categorySkills = skills.filter(s => s.category === category);
-          if (categorySkills.length === 0) return null;
-
+          
           return (
             <div key={category} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
               <h3 className="text-lg font-bold text-slate-800 capitalize mb-6 flex items-center gap-3">
