@@ -126,12 +126,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async toggleGoal(id: number, userId: number): Promise<Goal> {
-    const goal = await db.select().from(goals).where(and(eq(goals.id, id), eq(goals.userId, userId))).limit(1);
-    if (!goal.length) throw new Error("Goal not found");
+    const goalList = await db.select().from(goals).where(and(eq(goals.id, id), eq(goals.userId, userId))).limit(1);
+    if (!goalList.length) throw new Error("Goal not found");
+    const goal = goalList[0];
     
     const [updated] = await db
       .update(goals)
-      .set({ isCompleted: !goal[0].isCompleted })
+      .set({ isCompleted: !goal.isCompleted })
       .where(and(eq(goals.id, id), eq(goals.userId, userId)))
       .returning();
     return updated;
